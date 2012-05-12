@@ -145,7 +145,7 @@ static void passthrough_up_parse(struct AutopilotMessagePTUp *msg_up)
     radio_control.values[RADIO_KILL] = msg_up->rc_kill;
     radio_control.values[RADIO_GEAR] = msg_up->rc_gear;
     radio_control.values[RADIO_AUX2] = msg_up->rc_aux2;
-    radio_control.values[RADIO_AUX3] = msg_up->rc_aux3;
+    radio_control.values[CAMERA_RADIO_CHANNEL] = msg_up->rc_aux3;
     radio_control_callback();
   }
   // always fill status, it may change even when in the case when there is no new data
