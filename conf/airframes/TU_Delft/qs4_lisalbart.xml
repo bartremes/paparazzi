@@ -63,12 +63,12 @@
     <let var="aileron_feedback_left"  value="+@ROLL * (9600 + @RC_THRUST)/9600"/>
     <let var="aileron_feedback_right" value="+@ROLL * (9600 + @RC_THRUST)/9600"/>
 
-    <!-- elevator feedback -->
+    <!-- elevator feedback 
     <let var="elevator_feedback_left"  value="-@PITCH * (9600 + @RC_THRUST)/9600"/>
     <let var="elevator_feedback_right" value="+@PITCH * (9600 + @RC_THRUST)/9600"/>
-    <!-- elevator feedback TUdelft
+    <!-- elevator feedback TUdelft-->
     <let var="elevator_feedback_left"  value="+@PITCH * (9600 + @RC_THRUST)/9600"/>
-    <let var="elevator_feedback_right" value="-@PITCH * (9600 + @RC_THRUST)/9600"/>-->
+    <let var="elevator_feedback_right" value="-@PITCH * (9600 + @RC_THRUST)/9600"/>
 
     <!--************* which mode uses which mixing strategy - edit this for configuration ****************-->
     <!-- mode hover -->
