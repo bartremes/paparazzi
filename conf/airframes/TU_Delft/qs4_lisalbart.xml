@@ -128,13 +128,13 @@
     <define name="THRUST_COEF" value="{  256,  256,  256,  256 }"/>
   </section>
 
-  <include href="conf/airframes/TU_Delft/calib/imu_lisam_033_quadshot.xml"/>
+  <include href="conf/airframes/TU_Delft/calib/imu_lisam_033_quadshotbart.xml"/>
   <!--<include href="conf/airframes/esden/calib/imu_lisam_033.xml"/>-->
 
   <section name="IMU" prefix="IMU_">
 
     <define name="BODY_TO_IMU_PHI"   value="RadOfDeg(   0. )"/>
-    <define name="BODY_TO_IMU_THETA" value="RadOfDeg( 189. )"/>  <!-- +5 deg more away from you -->
+    <define name="BODY_TO_IMU_THETA" value="RadOfDeg( 180. )"/>  <!-- +5 deg more away from you -->
     <define name="BODY_TO_IMU_PSI"   value="RadOfDeg(   0. )"/> <!-- +5 deg more to the right in hover --> 
 
   </section>
@@ -249,15 +249,16 @@
   <section name="AHRS" prefix="AHRS_">
     <define name="PROPAGATE_FREQUENCY" value="512"/>
     <define name="MAG_UPDATE_YAW_ONLY" value="1"/>
-    <!-- magnetic field for Santa cruz from http://www.ngdc.noaa.gov/geomagmodels/IGRFWMM.jsp -->
-    <!--<define name="H_X" value=" 0.47577"/>
-    <define name="H_Y" value=" 0.11811"/>
-    <define name="H_Z" value=" 0.87161"/>-->
-    <!-- magnetic field for Rotterdam -->
-    <define name="H_X" value=" 0.39123"/>
-    <define name="H_Y" value=" 0.00059"/>
-    <define name="H_Z" value=" 0.92025"/>
+    <!--Rotterdam
+    <define name="H_X" value=" 0.3913233"/>
+    <define name="H_Y" value=" 0.0005934"/>
+    <define name="H_Z" value=" 0.9202531"/>
+  </section>-->
 
+    <!--Antwerpen-->
+    <define name="H_X" value=" 0.4006406"/>
+    <define name="H_Y" value=" 0.0008547"/>
+    <define name="H_Z" value=" 0.9162349"/>
   </section>
 
  <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
