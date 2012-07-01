@@ -31,11 +31,7 @@
 #include "firmwares/rotorcraft/stabilization.h"
 #include "firmwares/rotorcraft/camera_mount.h"
 #include "led.h"
-  #include "subsystems/electrical.h"
-#ifdef AUTOPILOT_LOBATT_WING_WAGGLE
-
-  #include "firmwares/rotorcraft/toytronics/toytronics_setpoint.h"
-#endif
+#include "subsystems/electrical.h"
 
 uint8_t  autopilot_mode;
 uint8_t  autopilot_mode_auto2;
@@ -45,7 +41,6 @@ bool_t   autopilot_rc_unkilled_startup; //toytronics: keep track of Tx on motor 
 bool_t   autopilot_first_boot; //toytronics: determine first power up for ahrs time delay
 bool_t   autopilot_mode1_kill; //toytronics: keep track of whether motor shutoff occurred in mode 1 
 bool_t   autopilot_safety_violation; //safety condition violated during startup attempt.
-int32_t  autopilot_lobatt_wing_waggle_interval; //interval at which wing waggle series occurs if batt is low
 
 bool_t   autopilot_in_flight;
 uint32_t autopilot_motors_on_counter;
@@ -98,9 +93,6 @@ void autopilot_init(void) {
   #ifdef USE_CAMERA_MOUNT
     camera_mount_init();
   #endif
-  #ifdef AUTOPILOT_LOBATT_WING_WAGGLE
-    autopilot_lobatt_wing_waggle_interval = AUTOPILOT_LOBATT_WING_WAGGLE_INTERVAL;
-  #endif
 }
 
 
@@ -127,24 +119,6 @@ void autopilot_periodic(void) {
     SetCommands(stabilization_cmd,
         autopilot_in_flight, autopilot_motors_on);
   }
-#ifdef AUTOPILOT_LOBATT_WING_WAGGLE
-  if (electrical.vsupply < (MIN_BAT_LEVEL * 10) && electrical.vsupply > (5 * 10)){
-    RunOnceEvery(autopilot_lobatt_wing_waggle_interval,{setpoint_lobatt_wing_waggle_num=0;})
-  }
-#endif
-#ifdef AHRS_ALIGNER_LED
-#ifdef AUTOPILOT_LOBATT_BLINK
-  if (electrical.vsupply < (MIN_BAT_LEVEL * 10)){
-    RunOnceEvery(30, {LED_TOGGLE(AHRS_ALIGNER_LED);});
-    }
-  else if (electrical.vsupply < ((MIN_BAT_LEVEL + 0.5) * 10)){
-    RunOnceEvery(60, {LED_TOGGLE(AHRS_ALIGNER_LED);});
-    }
-  else if (!autopilot_first_boot && !autopilot_safety_violation){
-    LED_ON(AHRS_ALIGNER_LED);
-    }
-#endif
-#endif
 #ifdef USE_CAMERA_MOUNT
   camera_mount_run();
 #endif
@@ -206,7 +180,7 @@ void autopilot_set_mode(uint8_t new_autopilot_mode) {
     switch (new_autopilot_mode) {
     case AP_MODE_FAILSAFE:
 #ifndef KILL_AS_FAILSAFE
-      guidance_v_zd_sp = SPEED_BFP_OF_REAL(0.5);
+      guidance_v_zd_sp = SPEED_BFP_OF_REAL(0.0);
       guidance_v_mode_changed(GUIDANCE_V_MODE_CLIMB);
       break;
 #endif
@@ -311,18 +285,12 @@ static inline void autopilot_check_motors_on( void ) {
 		if (radio_control.values[RADIO_KILL_SWITCH]<0 && ahrs_is_aligned() && !autopilot_first_boot && radio_control.values[RADIO_MODE] < -4000)
 			autopilot_rc_unkilled_startup = FALSE;
 	if (autopilot_first_boot && ahrs_is_aligned()){
-		#ifdef AHRS_ALIGNER_LED
-			RunOnceEvery(20, {LED_TOGGLE(AHRS_ALIGNER_LED);});
-		#endif
-		RunOnceEvery(512,{autopilot_first_boot = FALSE; LED_ON(AHRS_ALIGNER_LED);})
+		RunOnceAfter(512,{autopilot_first_boot = FALSE;});
 		}
 	if (!autopilot_motors_on && !autopilot_first_boot && autopilot_mode1_kill){
 		autopilot_motors_on=radio_control.values[RADIO_KILL_SWITCH]>0 && radio_control.values[RADIO_MODE] < -4000 && THROTTLE_STICK_DOWN() && YAW_STICK_CENTERED() && PITCH_STICK_CENTERED() && ROLL_STICK_CENTERED() && ahrs_is_aligned() && !autopilot_rc_unkilled_startup;
 		  if (!autopilot_motors_on && radio_control.values[RADIO_KILL_SWITCH]>0){
 		    autopilot_safety_violation = TRUE;
-		    #ifdef AHRS_ALIGNER_LED
-  		      RunOnceEvery(2, {LED_TOGGLE(AHRS_ALIGNER_LED);});
-		    #endif
 		    }
 		  else{
 		    autopilot_safety_violation = FALSE;
@@ -342,18 +310,12 @@ static inline void autopilot_check_motors_on( void ) {
 		if (THROTTLE_STICK_DOWN() && ahrs_is_aligned() && !autopilot_first_boot && radio_control.values[RADIO_MODE] < -4000)
 			autopilot_rc_unkilled_startup = FALSE;
 	if (autopilot_first_boot && ahrs_is_aligned()){
-		#ifdef AHRS_ALIGNER_LED
-			RunOnceEvery(20, {LED_TOGGLE(AHRS_ALIGNER_LED);});
-		#endif
-		RunOnceEvery(512,{autopilot_first_boot = FALSE; LED_ON(AHRS_ALIGNER_LED);})
+		RunOnceAfter(512,{autopilot_first_boot = FALSE;});
 		}	
 	if (!autopilot_motors_on && !autopilot_first_boot && autopilot_mode1_kill){
 		autopilot_motors_on=!THROTTLE_STICK_DOWN() && radio_control.values[RADIO_MODE] < -4000 && YAW_STICK_CENTERED() && PITCH_STICK_CENTERED() && ROLL_STICK_CENTERED() && ahrs_is_aligned() && !autopilot_rc_unkilled_startup;
 		  if (!autopilot_motors_on && ahrs_is_aligned() && (radio_control.values[RADIO_MODE] > -4000 || !YAW_STICK_CENTERED() || !PITCH_STICK_CENTERED() || !ROLL_STICK_CENTERED() || autopilot_rc_unkilled_startup)){
 		    autopilot_safety_violation = TRUE;
-		    #ifdef AHRS_ALIGNER_LED
-  		      RunOnceEvery(2, {LED_TOGGLE(AHRS_ALIGNER_LED);});
-		    #endif
 		    }
 		  else{
 		    autopilot_safety_violation = FALSE;
