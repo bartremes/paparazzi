@@ -34,10 +34,10 @@
     <define name="AUTOPILOT_KILL_WITHOUT_AHRS"  value="TRUE"/>
     <define name="AUTOPILOT_THROTTLE_INSTANT_START_WITH_SAFETIES"  value="TRUE"/>
     <define name="AUTOPILOT_LOBATT_BLINK"  value="TRUE"/>
-    <!--This is to enable a wing waggle at specified low battery voltage. The interval is in cycle counts, not seconds-->
-    <!--define name="AUTOPILOT_LOBATT_WING_WAGGLE"/>
-    <define name="AUTOPILOT_LOBATT_WING_WAGGLE_INTERVAL"  value="5120"/-->
+    <!--This is to enable a wing waggle at specified low battery voltage.-->
+    <define name="LOBATT_WING_WAGGLE" value="TRUE"/>
     <define name="TOYTRONICS" value="TRUE"/>
+    <define name="KILL_AS_FAILSAFE" value="TRUE"/>
   </section>
 
   <rc_commands>
@@ -47,6 +47,7 @@
     <set command="RC_PITCH" value="@PITCH"/>
     <set command="RC_THRUST" value="@THROTTLE"/>
   </rc_commands>
+
 
 
   <command_laws>
@@ -76,8 +77,8 @@
     <let var="hover_right" value="3*$aileron_feedback_right"/>
 
     <!-- mode hover_forward -->
-    <let var="hover_forward_left"  value="3*$aileron_feedback_left  + 2*$elevator_feedback_left"/>
-    <let var="hover_forward_right" value="3*$aileron_feedback_right + 2*$elevator_feedback_right"/>
+    <let var="hover_forward_left"  value="@RC_THRUST > 1800 ? (3*$aileron_feedback_left  + 2*$elevator_feedback_left) : (@RC_PITCH > 1600 ? (3*$aileron_feedback_left  + 2*$elevator_feedback_left) : (@RC_PITCH < -1800 ? (3*$aileron_feedback_left  + 2*$elevator_feedback_left) : 0))"/>
+    <let var="hover_forward_right" value="@RC_THRUST > 1800 ? (3*$aileron_feedback_right  + 2*$elevator_feedback_right) : (@RC_PITCH > 1600 ? (3*$aileron_feedback_right  + 2*$elevator_feedback_right) : (@RC_PITCH < -1800 ? (3*$aileron_feedback_right  + 2*$elevator_feedback_right) : 0))"/>
 
     <!-- mode forward -->
     <let var="forward_left"  value="3*$aileron_feedback_left  + 2*$elevator_feedback_left"/>
@@ -88,8 +89,6 @@
     <let var="forward_right" value="3*$aileron_feedback_right + 2*$elevator_feedback_right - 2400"/-->
 
     <!-- mode aerobatic -->
-    <!-- <let var="aerobatic_left"  value="$aileron_direct_left  + $elevator_feedback_left"/> -->
-    <!-- <let var="aerobatic_right" value="$aileron_direct_right + $elevator_feedback_right"/> -->
     <let var="aerobatic_left"  value="3*$aileron_feedback_left  + 2*$elevator_feedback_left"/>
     <let var="aerobatic_right" value="3*$aileron_feedback_right + 2*$elevator_feedback_right"/>
 
@@ -284,12 +283,13 @@
 
  <modules main_freq="512">
    <load name="battery_buzzer.xml"/>
+   <load name="led_driver.xml"/>
    <!-- <load name="quadshot_nav_mode_change.xml"/> -->
-   <load name="adc_generic.xml">
+   <!--<load name="adc_generic.xml">
       <configure name="ADC_CHANNEL_GENERIC1" value="1"/>
       <configure name="ADC_CHANNEL_GENERIC2" value="0"/>
    </load>
-   <!--<load name="opticflow_ADNS3080.xml"/>
+   <load name="opticflow_ADNS3080.xml"/>
     <load name="sonar_maxbotix_MB12XX.xml"/>-->
  </modules>
 
@@ -321,6 +321,7 @@
     </target>
 
     <subsystem name="imu"           type="aspirin_v1.5"/>
+    <configure name="PERIODIC_FREQUENCY" value="512"/>
     <subsystem name="gps"               type="ublox">
       <configure name="GPS_PORT"                value="UART3"/>
       <configure name="GPS_BAUD"                value="B38400"/>
