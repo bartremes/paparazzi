@@ -238,14 +238,6 @@ hover_forward_yaw_of_quat(const quat_t * const q)
 }
 
 static double
-hover_forward_roll_of_quat(const quat_t * const q)
-{
-  double r23 = 2*(q->q2*q->q3 + q->q0*q->q1);
-  BOUND(r23, -1, 1);
-  return asin(r23);
-}
-
-static double
 tc_fading(const quat_t * const q_n2b)
 {
   // linear interpolation - no dead band
@@ -418,12 +410,27 @@ toytronics_set_sp_hover_forward_from_rc()
   double rcp = rc->pitch;
   double rcr = rc->roll;
   double rcy = apply_deadband(rc->yaw, SETPOINT_DEADBAND);
-  int8_t rcx = rc->aux3 + 2;
+  int8_t rcx = rc->expo + 2;
+  int8_t rcxy= 1;
+  if (rcx<=1)
+    {
+    rcx=1;
+    rcxy=1;
+    }
+  if (rcx==2)
+    {
+    rcxy=rcx-1;
+    }
+  if (rcx>=3) 
+    {
+    rcx=3;
+    rcxy=rcx-1;
+    }
 
   //****************rc sticks sensitivity adjustment****************
   rc_sensitizer(&rcr, rcx);//setpoint_rc_sensitivity.x);
   rc_sensitizer(&rcp, rcx);//setpoint_rc_sensitivity.y);
-  rc_sensitizer(&rcy, rcx);//setpoint_rc_sensitivity.z);
+  rc_sensitizer(&rcy, rcxy);//setpoint_rc_sensitivity.z);
   //****************rc sticks sensitivity adjustment****************
 
   //****************low battery wing waggle****************
@@ -541,13 +548,28 @@ toytronics_set_sp_absolute_forward_from_rc()
   double rcp = rc->pitch;
   double rcr = apply_deadband(rc->roll, SETPOINT_DEADBAND);
   double rcy = apply_deadband(rc->yaw, SETPOINT_DEADBAND);
-  int8_t rcx = rc->aux3 + 2;
+  int8_t rcx = rc->expo + 2;
+  int8_t rcxy= 1;
+  if (rcx<=1)
+    {
+    rcx=1;
+    rcxy=1;
+    }
+  if (rcx==2)
+    {
+    rcxy=rcx-1;
+    }
+  if (rcx>=3) 
+    {
+    rcx=3;
+    rcxy=rcx-1;
+    }
   double rct = rc->throttle;
 
   //****************rc sticks sensitivity adjustment****************
   rc_sensitizer(&rcr, rcx);//setpoint_rc_sensitivity.x);
   rc_sensitizer(&rcp, rcx);//setpoint_rc_sensitivity.y);
-  rc_sensitizer(&rcy, rcx);//setpoint_rc_sensitivity.z);
+  rc_sensitizer(&rcy, rcxy);//setpoint_rc_sensitivity.z);
   //****************rc sticks sensitivity adjustment****************
 
   //****************low battery wing waggle****************
@@ -618,13 +640,28 @@ toytronics_set_sp_incremental_from_rc()
   double rcp = apply_deadband(rc->pitch, SETPOINT_DEADBAND);
   double rcr = apply_deadband(rc->roll, SETPOINT_DEADBAND);
   double rcy = apply_deadband(rc->yaw, SETPOINT_DEADBAND);
-  int8_t rcx = rc->aux3 + 2;
+  int8_t rcx = rc->expo + 2;
+  int8_t rcxy= 1;
+  if (rcx<=1)
+    {
+    rcx=1;
+    rcxy=1;
+    }
+  if (rcx==2)
+    {
+    rcxy=rcx-1;
+    }
+  if (rcx>=3) 
+    {
+    rcx=3;
+    rcxy=rcx-1;
+    }
   double rct = rc->throttle;
 
   //****************rc sticks sensitivity adjustment****************
   rc_sensitizer(&rcr, rcx);//setpoint_rc_sensitivity.x);
   rc_sensitizer(&rcp, rcx);//setpoint_rc_sensitivity.y);
-  rc_sensitizer(&rcy, rcx);//setpoint_rc_sensitivity.z);
+  rc_sensitizer(&rcy, rcxy);//setpoint_rc_sensitivity.z);
   //****************rc sticks sensitivity adjustment****************
 
   //****************low battery wing waggle****************

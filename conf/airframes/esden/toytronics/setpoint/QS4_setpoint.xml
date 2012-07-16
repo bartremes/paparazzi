@@ -4,7 +4,7 @@
     <define name="MAX_STICK_ANGLE_DEG"                 value="90.0"/>
     <define name="MAX_STICK_DEG_PER_SEC"               value="720.0"/>
     <define name="BOUND_ERROR_HEADING_DEG"             value="60.0"/>
-    <define name="MODE_1_2_TRANSITION_DEGREES_PER_SEC" value="45.0"/>
+    <define name="MODE_1_2_TRANSITION_DEGREES_PER_SEC" value="30.0"/>
 
     <define name="HOVER_PITCH_TRIM_DEG"             value="0.0"/>
     <define name="ABSOLUTE_FORWARD_PITCH_TRIM_DEG"  value="8.0"/>
@@ -22,9 +22,9 @@
     <define name="MODE_2_BOUND_QUAT_DEG_Y"    value="180"/>
     <define name="MODE_2_BOUND_QUAT_DEG_Z"    value="180"/>
     
-    <define name="AEROBATIC_DECAY_TIME_X" value="0.2"/>
+    <define name="AEROBATIC_DECAY_TIME_X" value="0.3"/>
     <define name="AEROBATIC_DECAY_TIME_Y" value="0.3"/>
-    <define name="AEROBATIC_DECAY_TIME_Z" value="0.2"/>
+    <define name="AEROBATIC_DECAY_TIME_Z" value="0.3"/>
 
     <define name="RC_SENSITIVITY_X" value="1.0"/>
     <define name="RC_SENSITIVITY_Y" value="1.0"/>
