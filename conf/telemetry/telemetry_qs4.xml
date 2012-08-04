@@ -27,6 +27,7 @@
       <message name="BARO_RAW"          period=".2"/>
       <message name="IMU_GYRO_SCALED"        period=".1"/>
       <message name="IMU_ACCEL_SCALED"       period=".1"/>
+      <message name="TOYTRONICS_ACTUATOR_PWM_VALUES" period=".2"/>
     </mode>
 
     <mode name="ppm">

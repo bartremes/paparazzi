@@ -872,6 +872,16 @@ extern uint8_t telemetry_mode_Main_DefaultChannel;
                                       &sp_heading,      \
                                       &es_heading);     \
   }
+#define PERIODIC_SEND_TOYTRONICS_ACTUATOR_PWM_VALUES(_chan) {                      \
+    DOWNLINK_SEND_TOYTRONICS_ACTUATOR_PWM_VALUES(_chan,                            \
+					         actuators_pwm_values[SERVO_A1],   \
+					         actuators_pwm_values[SERVO_B1],   \
+					         actuators_pwm_values[SERVO_A2],   \
+					         actuators_pwm_values[SERVO_B2],   \
+					         actuators_pwm_values[SERVO_AILEVON_LEFT],   \
+					         actuators_pwm_values[SERVO_AILEVON_RIGHT]  );                  \
+  }
+
 #endif // USE_TOYTRONICS
 
 

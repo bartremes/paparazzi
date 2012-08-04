@@ -575,8 +575,16 @@
     <field name="cmd_elevon_roll"  type="int32"/>
     <field name="cmd_elevon_pitch" type="int32"/>
   </message>
- <!-- 72 is free -->
- <!-- 73 is free -->
+  <message name="TOYTRONICS_ACTUATOR_PWM_VALUES" id="72">
+    <field name="a1"        type="int32"/>
+    <field name="b1"        type="int32"/>
+    <field name="a2"        type="int32"/>
+    <field name="b2"        type="int32"/>
+    <field name="ail_left"  type="int32"/>
+    <field name="ail_right" type="int32"/>
+  </message>
+ 
+<!-- 73 is free -->
  <!-- 74 is free -->
  <!-- 75 is free -->
 
