@@ -93,8 +93,8 @@
  <section name="AUTOPILOT">
    <define name="MODE_STARTUP" value="AP_MODE_NAV"/>
    <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
-   <define name="MODE_AUTO1" value="AP_MODE_HOVER_Z_HOLD"/>
-   <define name="MODE_AUTO2" value="AP_MODE_NAV"/>
+   <define name="MODE_AUTO1" value="AP_MODE_ATTITUDE_Z_HOLD"/>
+   <define name="MODE_AUTO2" value="AP_MODE_HOVER_Z_HOLD"/>
 
     <define name="USE_THROTTLE_FOR_MOTOR_ARMING" value="TRUE"/>
     <define name="NO_RC_THRUST_LIMIT" value="TRUE"/>
@@ -211,11 +211,9 @@
   <firmware name="rotorcraft">
     <target name="ap" board="lisa_s_1.0">
       <subsystem name="radio_control" type="superbitrf_rc">
-        <define name="RADIO_TRANSMITTER_ID" value="3641009656"/> <!-- erik 3641009656 TUDelft Dx6i: TX 4 is 1974942194, TX 5 is 692352099-->
-        <define name="RADIO_TRANSMITTER_CHAN" value="6"/>
-        <define name="RADIO_TRANSMITTER_PROTOCOL" value="0x01"/>
-        <define name="RADIO_MODE" value="RADIO_FLAP"/>
-        <define name="RADIO_KILL_SWITCH" value="RADIO_GEAR"/>
+        <define name="RADIO_MODE" value="RADIO_GEAR"/>
+        <!--<define name="RADIO_KILL_SWITCH" value="RADIO_GEAR"/>-->
+        <define name="USE_PERSISTENT_SETTINGS" value="TRUE"/>
       </subsystem>
 
       <configure name="AHRS_PROPAGATE_FREQUENCY" value="500"/>
@@ -242,14 +240,14 @@
     <!--<subsystem name="telemetry" type="superbitrf"/>-->
     <!-- Comment the previous line and uncomment the following one if you need
          to use the debug serial interface for telemetry. -->
-    <subsystem name="telemetry" type="transparent"/>
+    <subsystem name="telemetry" type="superbitrf"/>
     <subsystem name="imu" type="lisa_s_v1.0">
       <define name="LISA_S_UPSIDE_DOWN"/> <!-- Upside down is a relative term. :) -->
     </subsystem>
     <subsystem name="gps" type="ublox"/>
     <subsystem name="stabilization" type="int_quat"/>
     <subsystem name="ahrs" type="int_cmpl_quat">
-      <configure name="USE_MAGNETOMETER" value="1"/>
+      <configure name="USE_MAGNETOMETER" value="0"/>
       <define name="AHRS_USE_GPS_HEADING" value="0"/>
     </subsystem>
     <subsystem name="ins"/>
