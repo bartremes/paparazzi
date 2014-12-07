@@ -64,7 +64,7 @@ The goal of this flightplan is to have a safe, simple no-brainer flightplan for 
       <!--   <exception cond="!autopilot_motors_on" deroute="Takeoff"/>-->
       <set value="0" var="autopilot_flight_time"/>    
       <!-- If take-off to first point takes to long to reach somehow because of some reason, abort flight -->
-     <exception cond="block_time > 120" deroute="Land"/>
+     <exception cond="block_time > 60" deroute="Land"/>
      <!-- To make sure that takoff is straight up to the height of first waypoint A, so no sideways take-off, since sideways movements starting at low height from takeoff can have nasty effects) -->
 <!-- In real life aircraft can be blown sideways with strong wind TODO experiment with results of 2 stages 2 -->
 <!-- TODO see if adding this 2nd stage is better -->
@@ -74,6 +74,7 @@ The goal of this flightplan is to have a safe, simple no-brainer flightplan for 
     </block>
 <!-- The From A to B and back, The only one visible block so no GCS choices to toy around with, a non expert would get confused -->
     <block key="f" name="Follow">
+      <exception cond="block_time > 60" deroute="Land"/>
       <go wp="A"/>
       <stay wp="A"/>
       <!-- to make sure the route height to touchdown is high not lower than on the first takeoff-->
@@ -84,9 +85,10 @@ The goal of this flightplan is to have a safe, simple no-brainer flightplan for 
 <!-->Set land to here-->
       <go wp="_CLIMB"/>
       <go wp="Landingspot"/>
+      <exception cond="NavDetectGround()" deroute="Holding point"/>
       <exception cond="!nav_is_in_flight()" deroute="Holding point"/>
 <!-- decend with 2ms while staying at same spot-->
-      <stay climb="-2.0" vmode="climb" wp="Landingspot"/>
+      <stay climb="-0.8" vmode="climb" wp="Landingspot"/>
     </block>
 <!-- To be able to react to the panic button. On throttle this works better if your battery is almost empty it will not try to throttle up creating a batt dip, and then a mainboard that would stop working -->
     <block name="Emergency" key="e" strip_button="Emergency" strip_icon="home_emergency.png">
