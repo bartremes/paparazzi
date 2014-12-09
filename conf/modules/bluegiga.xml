@@ -14,6 +14,7 @@
     <file name="bluegiga.c"/>
     <define name="USE_SPI2_SLAVE"/>
     <define name="SPI_SLAVE"/>
+    <define name="SPI2_SLAVE_NO_NSS"/>
   </makefile>
 </module>
 
