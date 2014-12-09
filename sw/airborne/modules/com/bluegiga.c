@@ -25,8 +25,18 @@
 
 #include "modules/com/bluegiga.h"
 
-// void bluegiga_init() {}
-// void bluegiga_periodic() {}
-// void bluegiga_event() {}
+#include "mcu_periph/gpio.h"
+
+void bluegiga_init()
+{
+  gpio_setup_output(GPIOC, GPIO6);
+}
+
+void bluegiga_periodic()
+{
+  gpio_toggle(GPIOC, GPIO6);
+}
+
+void bluegiga_event() {}
 
 
