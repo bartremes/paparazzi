@@ -12,8 +12,8 @@
   <event fun="bluegiga_event()"/>
   <makefile>
     <file name="bluegiga.c"/>
-<!--      <define name="USE_SPI2_SLAVE"/>
-    <define name="SPI_SLAVE"/> -->
+    <define name="USE_SPI2_SLAVE"/>
+    <define name="SPI_SLAVE"/>
   </makefile>
 </module>
 
