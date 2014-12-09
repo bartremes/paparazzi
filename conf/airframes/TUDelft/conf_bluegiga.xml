@@ -1,6 +1,6 @@
 <conf>
   <aircraft
-   name="LadyLisa"
+   name="LadyLisaBlueGiga"
    ac_id="164"
    airframe="airframes/TUDelft/bluegiga.xml"
    radio="radios/cockpitSX.xml"
