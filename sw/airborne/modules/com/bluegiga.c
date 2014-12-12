@@ -31,6 +31,7 @@
 
 /* The structure for the cyrf6936 chip that handles all the buffers and requests */
 struct BlueGigaDev {
+  int activated;
   struct spi_periph *spi_p;                 /**< The SPI peripheral for the connection */
   struct spi_transaction spi_t;             /**< The SPI transaction used for the writing and reading of registers */
   uint8_t input_buf[32];                    /**< The input buffer for the SPI transaction */
