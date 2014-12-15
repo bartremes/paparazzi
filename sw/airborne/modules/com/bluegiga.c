@@ -27,6 +27,7 @@
 
 #include "mcu_periph/gpio.h"
 #include "mcu_periph/spi.h"
+#include "led.h"
 
 
 /* The structure for the cyrf6936 chip that handles all the buffers and requests */
@@ -65,15 +66,19 @@ void bluegiga_init()
     bluegiga_dev.output_buf[i] = i;
   }
 
+  bluegiga_dev.activated = 0;
+  LED_INIT(3);
+
   spi_slave_register(bluegiga_dev.spi_p, &(bluegiga_dev.spi_t));
 }
 
 uint8_t counter = 0;
-void bluegiga_periodic()
-{
+//void bluegiga_periodic()
+//{
   //uint16_t rx_value = 0x42;
 
-  gpio_toggle(GPIOC, GPIO6);
+  //if (bluegiga_dev.activated)
+  // gpio_toggle(GPIOC, GPIO6);
   //spi_set_nss_low(SPI2);
   //spi_send(SPI2, (uint8_t) counter);
   //rx_value = spi_read(SPI2);
@@ -88,14 +93,19 @@ void bluegiga_periodic()
 
   // Submit the transaction
   //spi_submit(bluegiga_dev.spi_p, &(bluegiga_dev.spi_t));
-}
+//}
 
 void bluegiga_event()
 {
+  if ( ++counter % 5 )
+    LED_TOGGLE(3);
   //if ((SPI_SR(SPI2) & SPI_SR_TXE))
   //  spi_send(SPI2, counter++);
   if(bluegiga_dev.spi_t.status == SPITransSuccess)
   {
+    //if (!bluegiga_dev.activated)
+    //  bluegiga_dev.activated = 1;
+
     gpio_toggle(GPIOC, GPIO6);
     bluegiga_dev.output_buf[0] = counter++;
     bluegiga_dev.spi_t.input_length = 20;

@@ -27,7 +27,7 @@
 #define BLUEGIGA_H
 
 extern void bluegiga_init(void);
-extern void bluegiga_periodic(void);
+// extern void bluegiga_periodic(void);
 extern void bluegiga_event(void);
 
 #endif
