@@ -22,7 +22,7 @@
 
 /**
  * @file subsystems/datalink/BLUEGIGA.c
- * BLUEGIGA ethernet chip I/O
+ * datalink implementation for the BlueGiga Bleutooth radio chip trough SPI
  */
 
 #include "mcu_periph/sys_time.h"
@@ -32,43 +32,6 @@
 
 #define TXBUF_BASE 0x4000
 #define RXBUF_BASE 0x6000
-#define SOCKETS 4
-
-#define CMD_SOCKET 1
-#define TELEM_SOCKET 0
-
-#define SOCK_OPEN 0x01
-#define SOCK_CLOSE 0x10
-#define SOCK_SEND 0x20
-#define SOCK_RECV 0x40
-#define SNMR_UDP 0x02
-#define SNMR_MULTI 0x80
-#define SNIR_SEND_OK 0x10
-#define SNIR_TIMEOUT 0x08
-#define CH_BASE 0x0400
-#define CH_SIZE 0x0100
-#define SMASK 0x07FF // Tx buffer MASK
-#define RMASK 0x07FF // Tx buffer MASK
-
-#define REG_MR 0x0000
-#define REG_RX_MEM 0x001A
-#define REG_TX_MEM 0x001B
-
-#define REG_GAR 0x0001
-#define REG_SUBR 0x0005
-#define REG_SHAR 0x0009
-#define REG_SIPR 0x000F
-
-#define SOCK_MR 0x0000
-#define SOCK_CR 0x0001
-#define SOCK_IR 0x0002
-#define SOCK_PORT 0x0004
-#define SOCK_DHAR 0x0006
-#define SOCK_DIPR 0x000C
-#define SOCK_DPORT 0x0010
-#define SOCK_TX_WR 0x0024
-#define SOCK_RSR 0x0026
-#define SOCK_RXRD 0x0028
 
 #ifndef BLUEGIGA_SPI_DEV
 #define BLUEGIGA_SPI_DEV spi2
@@ -184,12 +147,6 @@ void BLUEGIGA_init( void ) {
 
   // transmit memory size
   bluegiga_set( REG_TX_MEM, 0x55 );
-
-  // Setting the required socket base addresses for reads and writes to/from sockets
-  for (int i=0; i<SOCKETS; i++) {
-    SBASE[i] = TXBUF_BASE + SSIZE * i;
-    RBASE[i] = RXBUF_BASE + RSIZE * i;
-  }
 
   // Configure generic device
   chip0.device.periph = (void *)(&chip0);

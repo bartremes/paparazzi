@@ -97,16 +97,16 @@ uint8_t counter = 0;
 
 void bluegiga_event()
 {
-  if ( ++counter % 5 )
-    LED_TOGGLE(3);
   //if ((SPI_SR(SPI2) & SPI_SR_TXE))
   //  spi_send(SPI2, counter++);
   if(bluegiga_dev.spi_t.status == SPITransSuccess)
   {
+      //if ( counter % 5 )
+	LED_TOGGLE(3);
     //if (!bluegiga_dev.activated)
     //  bluegiga_dev.activated = 1;
 
-    gpio_toggle(GPIOC, GPIO6);
+    //gpio_toggle(GPIOC, GPIO6);
     bluegiga_dev.output_buf[0] = counter++;
     bluegiga_dev.spi_t.input_length = 20;
     bluegiga_dev.spi_t.output_length = 20;
