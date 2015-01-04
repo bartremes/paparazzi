@@ -230,7 +230,7 @@
       <define name="USE_SERVOS_1AND2"/>
     </subsystem>
 
-    <subsystem name="telemetry" type="transparent"/>
+    <subsystem name="telemetry" type="bluegiga"/>
     <subsystem name="imu" type="lisa_s_v1.0">
       <define name="LISA_S_UPSIDE_DOWN"/> <!-- Upside down is a relative term. :) -->
     </subsystem>

@@ -30,9 +30,6 @@
 #include "mcu_periph/spi.h"
 #include "mcu_periph/gpio.h"
 
-#define TXBUF_BASE 0x4000
-#define RXBUF_BASE 0x6000
-
 #ifndef BLUEGIGA_SPI_DEV
 #define BLUEGIGA_SPI_DEV spi2
 #endif
@@ -50,15 +47,7 @@
 #endif
 
 struct bluegiga_periph chip0;
-uint8_t ck_a, ck_b;
 uint8_t bluegiga_rx_buf[BLUEGIGA_RX_BUFFER_SIZE];
-
-static const uint8_t RST = 7; // Reset BIT
-
-uint16_t SBASE[SOCKETS]; // Tx buffer base address
-uint16_t RBASE[SOCKETS]; // Rx buffer base address
-static const uint16_t SSIZE = 2048; // Max Tx buffer size
-static const uint16_t RSIZE = 2048; // Max Rx buffer size
 
 struct spi_transaction bluegiga_spi;
 
@@ -125,28 +114,15 @@ void BLUEGIGA_init( void ) {
   bluegiga_spi.output_buf = &chip0.work_tx[0];
 
   // wait one second for proper initialization (chip getting powered up).
-  sys_time_usleep(1000000);
+  //sys_time_usleep(1000000);
 
   // set DRDY pin
   gpio_setup_output(BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);
-  gpio_clear(BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);
-  sys_time_usleep(200);
-  gpio_set(BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);
+
+  //gpio_set(BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);
 
   // allow some time for the chip to wake up.
-  sys_time_usleep(20000);
-
-  // write reset bit into mode register
-  bluegiga_set( REG_MR, 1<<RST );
-
-  // allow some time to wake up...
-  sys_time_usleep(20000);
-
-  // receive memory size
-  bluegiga_set( REG_RX_MEM, 0x55 );
-
-  // transmit memory size
-  bluegiga_set( REG_TX_MEM, 0x55 );
+  //sys_time_usleep(20000);
 
   // Configure generic device
   chip0.device.periph = (void *)(&chip0);
@@ -179,10 +155,6 @@ void bluegiga_send() {
   if ( chip0.curbuf >= BLUEGIGA_BUFFER_NUM ) {
     chip0.curbuf = 0;
   }
-
-  uint16_t ptr = bluegiga_sock_get16( TELEM_SOCKET, SOCK_TX_WR );
-  uint16_t offset = ptr & SMASK;
-  uint16_t dstAddr = offset + SBASE[ TELEM_SOCKET ];
 
   chip0.tx_insert_idx[ chip0.curbuf ] = 0;
   chip0.tx_extract_idx[ chip0.curbuf ] = 0;

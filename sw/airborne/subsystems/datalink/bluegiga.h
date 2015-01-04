@@ -103,10 +103,10 @@ static inline void bluegiga_read_buffer( struct pprz_transport *t ) {
     if (BlueGigaBuffer(_dev)) {                    \
       bluegiga_read_buffer( &(_trans) );           \
       if (_trans.trans_rx.msg_received) {          \
-        pprz_parse_payload(&(_trans));         \
+        pprz_parse_payload(&(_trans));             \
         _trans.trans_rx.msg_received = FALSE;      \
-      }                                         \
-    }                                           \
+      }                                            \
+    }                                              \
   }
 
 
