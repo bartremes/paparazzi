@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Gerard Toonstra
+ * Copyright (C) 2014 Kirk Scheper <kirkscheper@gmail.com>
  *
  * This file is part of paparazzi.
  *
@@ -21,7 +21,7 @@
  */
 
 /**
- * @file subsystems/datalink/BLUEGIGA.c
+ * @file subsystems/datalink/bluegiga.c
  * datalink implementation for the BlueGiga Bleutooth radio chip trough SPI
  */
 
@@ -51,55 +51,17 @@ uint8_t bluegiga_rx_buf[BLUEGIGA_RX_BUFFER_SIZE];
 
 struct spi_transaction bluegiga_spi;
 
-static void bluegiga_read_data( uint8_t s, volatile uint8_t *src, volatile uint8_t *dst, uint16_t len );
-static uint16_t bluegiga_read(uint16_t _addr, uint8_t *_buf, uint16_t _len);
-
-static inline void bluegiga_set(uint16_t _reg, uint8_t _val)
-{
-  bluegiga_spi.output_buf[0] = 0xF0;
-  bluegiga_spi.output_buf[1] = _reg >> 8;
-  bluegiga_spi.output_buf[2] = _reg & 0xFF;
-  bluegiga_spi.output_buf[3] = _val;
-
-  spi_submit( &(BLUEGIGA_SPI_DEV), &bluegiga_spi );
-
-  // FIXME: no busy waiting! if really needed add a timeout!!!!
-  while(bluegiga_spi.status != SPITransSuccess);
-}
-
-static inline uint8_t bluegiga_get(uint16_t _reg)
-{
-  bluegiga_spi.output_buf[0] = 0x0F;
-  bluegiga_spi.output_buf[1] = _reg >> 8;
-  bluegiga_spi.output_buf[2] = _reg & 0xFF;
-
-  spi_submit( &(BLUEGIGA_SPI_DEV), &bluegiga_spi );
-
-  // FIXME: no busy waiting! if really needed add a timeout!!!!
-  while(bluegiga_spi.status != SPITransSuccess);
-
-  return bluegiga_spi.input_buf[3];
-}
-
-static inline void bluegiga_set_buffer(uint16_t _reg, volatile uint8_t *_buf, uint16_t _len)
-{
-  for (int i=0; i<_len; i++) {
-      bluegiga_set( _reg, _buf[ i ] );
-    _reg++;
-  }
-}
-
 // Functions for the generic device API
 static int true_function(struct bluegiga_periph* p __attribute__((unused)), uint8_t len __attribute__((unused))) { return TRUE; }
 static void dev_transmit(struct bluegiga_periph* p __attribute__((unused)), uint8_t byte) {  bluegiga_transmit(byte); }
 static void dev_send(struct bluegiga_periph* p __attribute__((unused))) { bluegiga_send(); }
 
-void BLUEGIGA_init( void ) {
+void bluegiga_init( void ) {
 
   // configure the SPI bus.
   bluegiga_spi.slave_idx = BLUEGIGA_SLAVE_IDX;
-  bluegiga_spi.output_length = 20;
-  bluegiga_spi.input_length = 20;
+  bluegiga_spi.output_length = BLUEGIGA_TX_BUFFER_SIZE;
+  bluegiga_spi.input_length = BLUEGIGA_RX_BUFFER_SIZE;
   bluegiga_spi.select = SPISelectUnselect;
 
   bluegiga_spi.cpol = SPICpolIdleHigh;
@@ -108,34 +70,33 @@ void BLUEGIGA_init( void ) {
   bluegiga_spi.bitorder = SPIMSBFirst;
   bluegiga_spi.cdiv = SPIDiv64;
 
-  chip0.status = BLUEGIGAStatusUninit;
-  chip0.curbuf = 0;
   bluegiga_spi.input_buf = &chip0.work_rx[0];
   bluegiga_spi.output_buf = &chip0.work_tx[0];
 
-  // wait one second for proper initialization (chip getting powered up).
-  //sys_time_usleep(1000000);
+  chip0.curbuf = 0;
 
   // set DRDY pin
   gpio_setup_output(BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);
-
-  //gpio_set(BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);
-
-  // allow some time for the chip to wake up.
-  //sys_time_usleep(20000);
 
   // Configure generic device
   chip0.device.periph = (void *)(&chip0);
   chip0.device.check_free_space = (check_free_space_t) true_function;
   chip0.device.transmit = (transmit_t) dev_transmit;
   chip0.device.send_message = (send_message_t) dev_send;
+
+  // register spi slave read for transaction
+  spi_slave_register( &(BLUEGIGA_SPI_DEV), &bluegiga_spi );
+}
+
+bool_t bluegiga_check_free_space(int len)
+{
+  return chip0.tx_insert_idx[ chip0.curbuf ] + len > BLUEGIGA_TX_BUFFER_SIZE;
 }
 
 void bluegiga_transmit( uint8_t data ) {
-
   uint16_t temp = (chip0.tx_insert_idx[ chip0.curbuf ] + 1) % BLUEGIGA_TX_BUFFER_SIZE;
 
-  if (temp == chip0.tx_extract_idx[ chip0.curbuf ]) {
+  if (!bluegiga_check_free_space(1)) {
     // no more room in this transaction.
     return;
   }
@@ -157,75 +118,35 @@ void bluegiga_send() {
   }
 
   chip0.tx_insert_idx[ chip0.curbuf ] = 0;
-  chip0.tx_extract_idx[ chip0.curbuf ] = 0;
 
-  if (offset + len > SSIZE) {
-    // Wrap around circular buffer
-    uint16_t size = SSIZE - offset;
-    bluegiga_set_buffer( dstAddr, &chip0.tx_buf[curbuf][0], size );
-    bluegiga_set_buffer( SBASE[ TELEM_SOCKET ], &chip0.tx_buf[curbuf][0] + size, len - size);
-  }
-  else {
-    bluegiga_set_buffer( dstAddr, &chip0.tx_buf[curbuf][0], len);
-  }
+  // reset output buffer
+  int i;
+  for (i=0; i<bluegiga_spi.output_length; i++)
+    bluegiga_spi.output_buf[i]=0;
 
-  // Reset write pointer
-  ptr += len;
-  bluegiga_sock_set( TELEM_SOCKET, SOCK_TX_WR, ptr >> 8 );
-  bluegiga_sock_set( TELEM_SOCKET, SOCK_TX_WR+1, ptr & 0xFF );
+  // copy data from working buffer to spi output buffer
+  memcpy(bluegiga_spi.output_buf, &chip0.tx_buf[curbuf][0], len);
 
-  // send
-  bluegiga_sock_set( TELEM_SOCKET, SOCK_CR, SOCK_SEND );
+  // trigger interrupt on BlueGiga to listen on spi
+  gpio_clear(BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);
 
-  uint8_t complete = bluegiga_sock_get( TELEM_SOCKET, SOCK_CR);
-  while ( complete != 0x00 ) {
-    complete = bluegiga_sock_get( TELEM_SOCKET, SOCK_CR);
-  }
+  // send data over spi slave
+  spi_submit( &(BLUEGIGA_SPI_DEV), &bluegiga_spi );
+
+  // reset interrupt pin
+  gpio_set(BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);
 }
 
+bool_t bluegiga_ch_available() {return bluegiga_spi.status == SPITransSuccess;}
+
 uint16_t bluegiga_receive( uint8_t *buf, uint16_t len __attribute__((unused))) {
-  uint8_t head[8];
-  uint16_t data_len=0;
-  uint16_t ptr=0;
 
-  // Get socket read pointer
-  ptr = bluegiga_sock_get16( CMD_SOCKET, SOCK_RXRD );
-  bluegiga_read_data( CMD_SOCKET, (uint8_t *)ptr, head, 0x08);
-  ptr += 8;
-  data_len = head[6];
-  data_len = (data_len << 8) + head[7];
+  uint16_t data_len=20;
 
-  // read data from buffer.
-  bluegiga_read_data( CMD_SOCKET, (uint8_t *)ptr, buf, data_len); // data copy.
-  ptr += data_len;
+  memcpy(buf, chip0.work_rx, data_len);
+
+  // register spi slave read for next transaction
+  spi_slave_register( &(BLUEGIGA_SPI_DEV), &bluegiga_spi );
 
   return data_len;
 }
-
-static void bluegiga_read_data( uint8_t s __attribute__((unused)), volatile uint8_t *src, volatile uint8_t *dst, uint16_t len ) {
-  uint16_t size;
-  uint16_t src_mask;
-  uint16_t src_ptr;
-
-  src_mask = (uint16_t)src & RMASK;
-  src_ptr = RBASE[CMD_SOCKET] + src_mask;
-
-  if( (src_mask + len) > RSIZE ) {
-    size = RSIZE - src_mask;
-    bluegiga_read(src_ptr, (uint8_t *)dst, size);
-    dst += size;
-    bluegiga_read(RBASE[CMD_SOCKET], (uint8_t *) dst, len - size);
-  } else {
-    bluegiga_read(src_ptr, (uint8_t *) dst, len);
-  }
-}
-
-static uint16_t bluegiga_read(uint16_t _addr, uint8_t *_buf, uint16_t _len)
-{
-  for (int i=0; i<_len; i++) {
-    _buf[i] = bluegiga_get( _addr );
-    _addr++;
-  }
-  return _len;
-}
-
