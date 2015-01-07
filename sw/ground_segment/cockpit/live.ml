@@ -102,9 +102,10 @@ type aircraft = {
   mutable ground_prox : bool;
   mutable got_track_status_timer : int;
   mutable last_dist_to_wp : float;
-  mutable dl_values : float array;
+  mutable dl_values : string option array;
   mutable last_unix_time : float;
-  mutable airspeed : float
+  mutable airspeed : float;
+  mutable version : string;
 }
 
 let aircrafts = Hashtbl.create 3
@@ -681,7 +682,8 @@ let create_ac = fun alert (geomap:G.widget) (acs_notebook:GPack.notebook) (ac_id
              notebook_label = _label;
              got_track_status_timer = 1000;
              dl_values = [||]; last_unix_time = 0.;
-             airspeed = 0.
+             airspeed = 0.;
+             version = ""
            } in
   Hashtbl.add aircrafts ac_id ac;
   select_ac acs_notebook ac_id;
@@ -739,8 +741,8 @@ let create_ac = fun alert (geomap:G.widget) (acs_notebook:GPack.notebook) (ac_id
               let id = settings_tab#assoc "snav_desired_tow" in
               let set_appointment = fun _ ->
                 begin try
-                        let v = ac.dl_values.(id) in
-                        let t = Unix.gmtime (Latlong.unix_time_of_tow (truncate v)) in
+                        let v = match ac.dl_values.(id) with None -> raise Not_found | Some x -> int_of_string x in
+                        let t = Unix.gmtime (Latlong.unix_time_of_tow v) in
                         ac.strip#set_label "apt" (sprintf "%d:%02d:%02d" t.Unix.tm_hour t.Unix.tm_min t.Unix.tm_sec)
                   with _ -> () end;
                 true
@@ -769,8 +771,8 @@ let create_ac = fun alert (geomap:G.widget) (acs_notebook:GPack.notebook) (ac_id
   ignore (Glib.Timeout.add 1000 monitor_track_status);;
 
 
-
-let ok_color = "green"
+(* since tcl8.6 "green" refers to "darkgreen" and the former "green" is now "lime", but that is not available in older versions, so hardcode the color to #00ff00*)
+let ok_color = "#00ff00"
 let warning_color = "orange"
 let alert_color = "red"
 
@@ -910,10 +912,13 @@ let listen_dl_value = fun () ->
     match ac.dl_settings_page with
         Some settings ->
           let csv = Pprz.string_assoc "values" vs in
-          let values = Array.map float_of_string (Array.of_list (Str.split list_separator csv)) in
+          let string_value = fun v -> match v with "?" -> None | _ -> Some v in
+          let values = Array.map string_value (Array.of_list (Str.split list_separator csv)) in
           ac.dl_values <- values;
           for i = 0 to min (Array.length values) settings#length - 1 do
-            settings#set i (try values.(i) with _ -> failwith (sprintf "values.(%d)" i))
+            try
+              settings#set i values.(i)
+            with _ -> ()
           done
       | None -> () in
   safe_bind "DL_VALUES" get_dl_value
@@ -1385,6 +1390,16 @@ let listen_info_msg = fun a ->
     log_and_say a ac.ac_name (Pprz.string_of_value msg_array) in
   tele_bind "INFO_MSG" (get_msg a)
 
+let listen_autopilot_version_msg = fun a ->
+  let get_msg = fun a _sender vs ->
+    let ac = find_ac _sender in
+    let desc_array = Pprz.assoc "desc" vs in
+    let version = Pprz.string_of_value desc_array in
+    if ac.version <> version then
+      log a ac.ac_name (sprintf "%s version:\n%s" ac.ac_name version);
+    ac.version <- version in
+  tele_bind "AUTOPILOT_VERSION" (get_msg a)
+
 let listen_tcas = fun a ->
   let get_alarm_tcas = fun a txt _sender vs ->
     let ac = find_ac _sender in
@@ -1422,6 +1437,7 @@ let listen_acs_and_msgs = fun geomap ac_notebook my_alert auto_center_new_ac alt
   listen_alert my_alert;
   listen_error my_alert;
   listen_info_msg my_alert;
+  listen_autopilot_version_msg my_alert;
   listen_tcas my_alert;
   listen_dcshot geomap;
 

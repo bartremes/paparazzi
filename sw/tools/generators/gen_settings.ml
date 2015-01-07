@@ -68,8 +68,19 @@ let print_dl_settings = fun settings ->
   lprintf "\n";
 
   (** Datalink knowing what settings mean **)
-  Xml2h.define "SETTINGS" "{ \\";
+  Xml2h.define "SETTINGS_NAMES" "{ \\";
   List.iter (fun b -> printf " { \"%s\" }, \\\n" (ExtXml.attrib b "var")) settings;
+  lprintf "};\n";
+
+  Xml2h.define "SETTINGS_NAMES_SHORT" "{ \\";
+  List.iter (fun b ->
+    let varname = Str.split (Str.regexp "[_.]+") (ExtXml.attrib b "var") in
+    let shortname = List.fold_left (fun acc c ->
+      try acc ^"_"^ (Str.first_chars c 3) with _ -> acc ^"_"^ c
+    ) "" varname in
+    let shorted = try String.sub shortname 1 16 with _ -> String.sub shortname 1 ((String.length shortname)-1) in
+    printf " \"%s\" , \\\n" shorted
+  ) settings;
   lprintf "};\n";
   Xml2h.define "NB_SETTING" (string_of_int (List.length settings));
 

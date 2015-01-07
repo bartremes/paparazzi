@@ -298,7 +298,7 @@ let log_and_parse = fun ac_name (a:Aircraft.aircraft) msg values ->
     | "DL_VALUE" ->
       let i = ivalue "index" in
       if i < max_nb_dl_setting_values then begin
-        a.dl_setting_values.(i) <- fvalue "value";
+        a.dl_setting_values.(i) <- Some (fvalue "value");
         a.nb_dl_setting_values <- max a.nb_dl_setting_values (i+1)
       end else
         failwith "Too much dl_setting values !!!"
@@ -318,7 +318,7 @@ let log_and_parse = fun ac_name (a:Aircraft.aircraft) msg values ->
       and lon = ivalue "lon"
       and alt = ivalue "alt" in
       let geo = make_geo_deg (float lat /. 1e7) (float lon /. 1e7) in
-      update_waypoint a (ivalue "wp_id") geo (float alt /. 100.)
+      update_waypoint a (ivalue "wp_id") geo (float alt /. 1000.)
     | "GENERIC_COM" ->
       let flight_time = ivalue "flight_time" in
       if flight_time >= a.flight_time then begin

@@ -46,7 +46,8 @@
 #define PPRZ 1
 #define XBEE 2
 #define SUPERBITRF 3
-#define BLUEGIGA 4
+#define W5100 4
+#define BLUEGIGA 5
 
 EXTERN bool_t dl_msg_available;
 /** Flag provided to control calls to ::dl_parse_msg. NOT used in this module*/
@@ -54,18 +55,18 @@ EXTERN bool_t dl_msg_available;
 EXTERN uint16_t datalink_time;
 
 #define MSG_SIZE 128
-EXTERN uint8_t dl_buffer[MSG_SIZE]  __attribute__ ((aligned));
+EXTERN uint8_t dl_buffer[MSG_SIZE]  __attribute__((aligned));
 
 EXTERN void dl_parse_msg(void);
 /** Should be called when chars are available in dl_buffer */
 
 /** Check for new message and parse */
 #define DlCheckAndParse() {   \
-  if (dl_msg_available) {      \
-    dl_parse_msg();            \
-    dl_msg_available = FALSE;  \
-  }                            \
-}
+    if (dl_msg_available) {      \
+      dl_parse_msg();            \
+      dl_msg_available = FALSE;  \
+    }                            \
+  }
 
 #if defined DATALINK && DATALINK == PPRZ
 
@@ -98,7 +99,7 @@ EXTERN void dl_parse_msg(void);
 #elif defined DATALINK && DATALINK == BLUEGIGA
 
 #define DatalinkEvent() {                       \
-    BlueGigaCheckAndParse(BLUEGIGA, pprz_tp);                  	\
+    BlueGigaCheckAndParse(BLUEGIGA, pprz_tp);   \
     DlCheckAndParse();                          \
   }
 
