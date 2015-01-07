@@ -98,7 +98,7 @@ EXTERN void dl_parse_msg(void);
 #elif defined DATALINK && DATALINK == BLUEGIGA
 
 #define DatalinkEvent() {                       \
-    BlueGigaCheckAndParse();                  	\
+    BlueGigaCheckAndParse(BLUEGIGA, pprz_tp);                  	\
     DlCheckAndParse();                          \
   }
 

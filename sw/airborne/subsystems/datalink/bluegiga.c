@@ -29,6 +29,7 @@
 #include "subsystems/datalink/bluegiga.h"
 #include "mcu_periph/spi.h"
 #include "mcu_periph/gpio.h"
+#include <string.h>
 
 #ifndef BLUEGIGA_SPI_DEV
 #define BLUEGIGA_SPI_DEV spi2
@@ -46,7 +47,7 @@
 #define BLUEGIGA_DRDY_GPIO_PIN GPIO6
 #endif
 
-struct bluegiga_periph chip0;
+struct bluegiga_periph bluegiga_p;
 uint8_t bluegiga_rx_buf[BLUEGIGA_RX_BUFFER_SIZE];
 
 struct spi_transaction bluegiga_spi;
@@ -70,19 +71,19 @@ void bluegiga_init( void ) {
   bluegiga_spi.bitorder = SPIMSBFirst;
   bluegiga_spi.cdiv = SPIDiv64;
 
-  bluegiga_spi.input_buf = &chip0.work_rx[0];
-  bluegiga_spi.output_buf = &chip0.work_tx[0];
+  bluegiga_spi.input_buf = &bluegiga_p.work_rx[0];
+  bluegiga_spi.output_buf = &bluegiga_p.work_tx[0];
 
-  chip0.curbuf = 0;
+  bluegiga_p.curbuf = 0;
 
   // set DRDY pin
   gpio_setup_output(BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);
 
   // Configure generic device
-  chip0.device.periph = (void *)(&chip0);
-  chip0.device.check_free_space = (check_free_space_t) true_function;
-  chip0.device.transmit = (transmit_t) dev_transmit;
-  chip0.device.send_message = (send_message_t) dev_send;
+  bluegiga_p.device.periph = (void *)(&bluegiga_p);
+  bluegiga_p.device.check_free_space = (check_free_space_t) true_function;
+  bluegiga_p.device.transmit = (transmit_t) dev_transmit;
+  bluegiga_p.device.send_message = (send_message_t) dev_send;
 
   // register spi slave read for transaction
   spi_slave_register( &(BLUEGIGA_SPI_DEV), &bluegiga_spi );
@@ -90,11 +91,11 @@ void bluegiga_init( void ) {
 
 bool_t bluegiga_check_free_space(int len)
 {
-  return chip0.tx_insert_idx[ chip0.curbuf ] + len > BLUEGIGA_TX_BUFFER_SIZE;
+  return bluegiga_p.tx_insert_idx[ bluegiga_p.curbuf ] + len > BLUEGIGA_TX_BUFFER_SIZE;
 }
 
 void bluegiga_transmit( uint8_t data ) {
-  uint16_t temp = (chip0.tx_insert_idx[ chip0.curbuf ] + 1) % BLUEGIGA_TX_BUFFER_SIZE;
+  uint16_t temp = (bluegiga_p.tx_insert_idx[ bluegiga_p.curbuf ] + 1) % BLUEGIGA_TX_BUFFER_SIZE;
 
   if (!bluegiga_check_free_space(1)) {
     // no more room in this transaction.
@@ -102,22 +103,22 @@ void bluegiga_transmit( uint8_t data ) {
   }
 
   // check if in process of sending data
-  chip0.tx_buf[ chip0.curbuf ][ chip0.tx_insert_idx[ chip0.curbuf ] ] = data;
-  chip0.tx_insert_idx[ chip0.curbuf ] = temp;
+  bluegiga_p.tx_buf[ bluegiga_p.curbuf ][ bluegiga_p.tx_insert_idx[ bluegiga_p.curbuf ] ] = data;
+  bluegiga_p.tx_insert_idx[ bluegiga_p.curbuf ] = temp;
 }
 
 void bluegiga_send() {
   // Now send off spi transaction.
-  uint16_t len = chip0.tx_insert_idx[ chip0.curbuf ];
-  uint8_t curbuf = chip0.curbuf;
+  uint16_t len = bluegiga_p.tx_insert_idx[ bluegiga_p.curbuf ];
+  uint8_t curbuf = bluegiga_p.curbuf;
 
   // switch to other buffer to accept more chars.
-  chip0.curbuf++;
-  if ( chip0.curbuf >= BLUEGIGA_BUFFER_NUM ) {
-    chip0.curbuf = 0;
+  bluegiga_p.curbuf++;
+  if ( bluegiga_p.curbuf >= BLUEGIGA_BUFFER_NUM ) {
+    bluegiga_p.curbuf = 0;
   }
 
-  chip0.tx_insert_idx[ chip0.curbuf ] = 0;
+  bluegiga_p.tx_insert_idx[ bluegiga_p.curbuf ] = 0;
 
   // reset output buffer
   int i;
@@ -125,7 +126,7 @@ void bluegiga_send() {
     bluegiga_spi.output_buf[i]=0;
 
   // copy data from working buffer to spi output buffer
-  memcpy(bluegiga_spi.output_buf, &chip0.tx_buf[curbuf][0], len);
+  memcpy(bluegiga_spi.output_buf, &bluegiga_p.tx_buf[curbuf][0], len);
 
   // trigger interrupt on BlueGiga to listen on spi
   gpio_clear(BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);
@@ -143,7 +144,7 @@ uint16_t bluegiga_receive( uint8_t *buf, uint16_t len __attribute__((unused))) {
 
   uint16_t data_len=20;
 
-  memcpy(buf, chip0.work_rx, data_len);
+  memcpy(buf, bluegiga_spi.input_buf, data_len);
 
   // register spi slave read for next transaction
   spi_slave_register( &(BLUEGIGA_SPI_DEV), &bluegiga_spi );

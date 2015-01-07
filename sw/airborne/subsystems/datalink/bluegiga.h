@@ -42,9 +42,6 @@ struct bluegiga_periph {
   /* Transmit buffer */
   volatile uint8_t tx_buf[BLUEGIGA_BUFFER_NUM][BLUEGIGA_TX_BUFFER_SIZE];
   volatile uint16_t tx_insert_idx[BLUEGIGA_BUFFER_NUM];
-  /* Working buffers*/
-  volatile uint8_t work_tx[BLUEGIGA_TX_BUFFER_SIZE];
-  volatile uint8_t work_rx[BLUEGIGA_TX_BUFFER_SIZE];
   // uint8_t tx_running;
   /** Generic device interface */
   struct link_device device;
@@ -52,7 +49,7 @@ struct bluegiga_periph {
 
 extern uint8_t bluegiga_rx_buf[BLUEGIGA_RX_BUFFER_SIZE];
 
-extern struct bluegiga_periph chip0;
+extern struct bluegiga_periph bluegiga_p;
 
 void bluegiga_init( void );
 bool_t bluegiga_check_free_space(int len);
@@ -66,7 +63,7 @@ bool_t bluegiga_ch_available( void );
 // We need to do these here...
 //TODO: check
 //#define BlueGigaInit() bluegiga_init()
-//#define BlueGigaTxRunning chip0.tx_running
+//#define BlueGigaTxRunning bluegiga_p.tx_running
 //#define BlueGigaSetBaudrate(_b) bluegiga_set_baudrate(_b)
 
 
@@ -93,17 +90,16 @@ static inline void bluegiga_read_buffer( struct pprz_transport *t ) {
 }
 
 // Device interface macros
-#define BlueGigaBuffer(_dev) TransportLink(_dev,ChAvailable())
 
-#define BlueGigaCheckFreeSpace(_x) bluegiga_check_free_space(_x)
+#define BlueGigaCheckFreeSpace(_x)  (((superbitrf.tx_insert_idx+1) %128) != superbitrf.tx_extract_idx)
 #define BlueGigaTransmit(_x) bluegiga_transmit(_x)
 #define BlueGigaSendMessage() bluegiga_send()
 #define BlueGigaChAvailable() bluegiga_ch_available()
 //TODO: check
 #define BlueGigaGetch() bluegiga_getch()
-
+// transmit previous date in buffer
 #define BlueGigaCheckAndParse(_dev,_trans) {       \
-    if (BlueGigaBuffer(_dev)) {                    \
+    if (BlueGigaChAvailable()) {                   \
       bluegiga_read_buffer( &(_trans) );           \
       if (_trans.trans_rx.msg_received) {          \
         pprz_parse_payload(&(_trans));             \
