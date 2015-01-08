@@ -49,7 +49,6 @@
 #endif
 
 struct bluegiga_periph bluegiga_p;
-
 struct spi_transaction bluegiga_spi;
 
 // Functions for the generic device API
@@ -71,37 +70,50 @@ void bluegiga_init (void)
 
   LED_INIT(3);
 
-  bluegiga_p.tx_running = 0;
   // configure the SPI bus.
-  bluegiga_spi.slave_idx = BLUEGIGA_SLAVE_IDX;
-  bluegiga_spi.input_buf = bluegiga_p.work_rx;
-  bluegiga_spi.output_buf = bluegiga_p.work_tx;
-  bluegiga_spi.output_length = 20;
-  bluegiga_spi.input_length = 20;
-  bluegiga_spi.select = SPISelectUnselect;
+  bluegiga_spi.input_buf      = bluegiga_p.work_rx;
+  bluegiga_spi.output_buf     = bluegiga_p.work_tx;
+  bluegiga_spi.input_length   = 20;
+  bluegiga_spi.output_length  = 20;
+  bluegiga_spi.slave_idx      = BLUEGIGA_SLAVE_IDX;
+  bluegiga_spi.select         = SPISelectUnselect;
+  bluegiga_spi.cpol           = SPICpolIdleHigh;
+  bluegiga_spi.cpha           = SPICphaEdge1;
+  bluegiga_spi.dss            = SPIDss8bit;
+  bluegiga_spi.bitorder       = SPIMSBFirst;
+  bluegiga_spi.cdiv           = SPIDiv64;
 
-  bluegiga_spi.cpol = SPICpolIdleHigh;
-  bluegiga_spi.cpha = SPICphaEdge1;
-  bluegiga_spi.dss = SPIDss8bit;
-  bluegiga_spi.bitorder = SPIMSBFirst;
-  bluegiga_spi.cdiv = SPIDiv64;
+  // initialize peripheral variables
+  bluegiga_p.tx_running       = 0;
+  bluegiga_p.rx_insert_idx    = 0;
+  bluegiga_p.rx_extract_idx   = 0;
+  bluegiga_p.tx_insert_idx    = 0;
+  bluegiga_p.tx_extract_idx   = 0;
 
-  bluegiga_p.rx_insert_idx = 0;
-  bluegiga_p.rx_extract_idx = 0;
-  bluegiga_p.tx_insert_idx = 0;
-  bluegiga_p.tx_extract_idx = 0;
-
-  // set DRDY pin
-  gpio_setup_output (BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);
+  for (int i = 0; i < bluegiga_spi.input_length; i++)
+  {
+    bluegiga_p.work_rx[i] = 0;
+    bluegiga_p.work_tx[i] = 0;
+  }
 
   // Configure generic device
-  bluegiga_p.device.periph = (void *) (&bluegiga_p);
+  bluegiga_p.device.periph    = (void *) (&bluegiga_p);
   bluegiga_p.device.check_free_space = (check_free_space_t) true_function;
-  bluegiga_p.device.transmit = (transmit_t) dev_transmit;
+  bluegiga_p.device.transmit  = (transmit_t) dev_transmit;
   bluegiga_p.device.send_message = (send_message_t) dev_send;
+
+  // set DRDY interrupt pin for spi master triggered on falling edge
+  gpio_setup_output (BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);
+  gpio_set(BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);
 
   // register spi slave read for transaction
   spi_slave_register (&(BLUEGIGA_SPI_DEV), &bluegiga_spi);
+}
+
+/* safe increment of circular buffer */
+void bluegiga_increment_buf(uint8_t *buf_idx, uint8_t len)
+{
+  *buf_idx = (*buf_idx + len) % BLUEGIGA_BUFFER_SIZE;
 }
 
 /* Add one byte to the end of tx circular buffer */
@@ -110,12 +122,16 @@ void bluegiga_transmit (uint8_t data)
   if (BlueGigaCheckFreeSpace() && bluegiga_p.tx_running)
     {
       bluegiga_p.tx_buf[bluegiga_p.tx_insert_idx] = data;
-      bluegiga_p.tx_insert_idx = (bluegiga_p.tx_insert_idx + 1) % BLUEGIGA_BUFFER_SIZE;
+      bluegiga_increment_buf(&bluegiga_p.tx_insert_idx, 1);
     }
 }
 
+/* Send data in transmit buffer to spi master */
 void bluegiga_send ()
 {
+  //if(bluegiga_spi.status != SPITransPending)
+  //  return;
+
   uint8_t packet_len;
 
   // check data available in buffer to send
@@ -127,40 +143,72 @@ void bluegiga_send ()
   {
     uint8_t i;
     // attach header with data length of real data in 20 char data string
-    bluegiga_spi.output_buf[0] = packet_len;
+    bluegiga_p.work_tx[0] = packet_len;
 
     // copy data from working buffer to spi output buffer
     for (i = 0; i < packet_len; i++)
-      bluegiga_spi.output_buf[i + 1] = bluegiga_p.tx_buf[(bluegiga_p.tx_extract_idx + i) % BLUEGIGA_BUFFER_SIZE];
+      bluegiga_p.work_tx[i + 1] = bluegiga_p.tx_buf[(bluegiga_p.tx_extract_idx + i) % BLUEGIGA_BUFFER_SIZE];
+    bluegiga_increment_buf(&bluegiga_p.tx_extract_idx, packet_len);
 
     // clear unused bytes
     for (i = packet_len + 1; i < bluegiga_spi.output_length; i++)
-      bluegiga_spi.output_buf[i] = 0;
+      bluegiga_p.work_tx[i] = 0;
+
+    // Test data integrity
+    for (i = 0; i < bluegiga_spi.output_length; i++)
+      bluegiga_p.work_tx[i] = i+1;
 
     // Now send off spi transaction!
     // trigger interrupt on BlueGiga to listen on spi
     gpio_clear (BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);
-
-    // send data over spi slave
-    spi_submit (&(BLUEGIGA_SPI_DEV), &bluegiga_spi);
-
+    while(bluegiga_spi.status != SPITransSuccess);
     // reset interrupt pin
     gpio_set (BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);
+
+    // clear tx buffer
+    for (i = 0; i < bluegiga_spi.output_length; i++)
+      bluegiga_p.work_tx[i] = 0;
   }
 }
 
+/* read data from dma if available */
 void bluegiga_receive ( void )
 {
   if (bluegiga_spi.status == SPITransSuccess)
   {
+    LED_TOGGLE(3);
+    bluegiga_spi.status = SPITransDone;
     if (!bluegiga_p.tx_running) bluegiga_p.tx_running = 1;
-    uint8_t packet_len = bluegiga_spi.input_buf[0];
+
+    uint8_t packet_len = bluegiga_p.work_rx[0];
+
+    if (packet_len > bluegiga_spi.input_length)
+    {
+      // connection lost event
+      bluegiga_p.tx_running = 0;
+      // reinitialize peripheral variables
+      bluegiga_p.rx_insert_idx    = 0;
+      bluegiga_p.rx_extract_idx   = 0;
+      bluegiga_p.tx_insert_idx    = 0;
+      bluegiga_p.tx_extract_idx   = 0;
+
+      LED_OFF(3);
+
+      spi_slave_register (&(BLUEGIGA_SPI_DEV), &bluegiga_spi);
+
+      return;
+    }
+
     uint8_t i;
     for (i = 0; i < packet_len; i++)
     {
-      bluegiga_p.rx_buf[(bluegiga_p.rx_insert_idx + i) % BLUEGIGA_BUFFER_SIZE] = bluegiga_spi.input_buf[i + 1];
+      bluegiga_p.rx_buf[(bluegiga_p.rx_insert_idx + i) % BLUEGIGA_BUFFER_SIZE] = bluegiga_p.work_rx[i + 1];
     }
-    bluegiga_p.rx_insert_idx += packet_len;
+    bluegiga_increment_buf(&bluegiga_p.rx_insert_idx, packet_len);
+
+    // clear rx buffer
+    for (i = 0; i < bluegiga_spi.output_length; i++)
+      bluegiga_p.work_rx[i] = 0;
 
     // register spi slave read for next transaction
     spi_slave_register (&(BLUEGIGA_SPI_DEV), &bluegiga_spi);

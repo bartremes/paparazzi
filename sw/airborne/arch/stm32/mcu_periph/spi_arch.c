@@ -1209,7 +1209,7 @@ void process_tx_dma_interrupt(struct spi_periph * periph) {
 /*
  *
  * SPI Slave code
- * Currently only for F1, SPI1
+ * Currently only for F1
  *
  */
 #ifdef SPI_SLAVE
