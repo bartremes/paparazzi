@@ -22,7 +22,7 @@
 
 /**
  * @file subsystems/datalink/bluegiga.c
- * datalink implementation for the BlueGiga Bleutooth radio chip trough SPI
+ * Datalink implementation for the BlueGiga Bluetooth radio chip trough SPI
  */
 
 #include "mcu_periph/sys_time.h"
@@ -48,6 +48,7 @@
 #define BLUEGIGA_DRDY_GPIO_PIN GPIO6
 #endif
 
+enum BlueGigaStatus coms_status;
 struct bluegiga_periph bluegiga_p;
 struct spi_transaction bluegiga_spi;
 
@@ -58,11 +59,15 @@ static int true_function (struct bluegiga_periph* p __attribute__((unused)), uin
 }
 static void dev_transmit (struct bluegiga_periph* p __attribute__((unused)), uint8_t byte)
 {
-  bluegiga_transmit (byte);
+  bluegiga_transmit(byte);
 }
 static void dev_send (struct bluegiga_periph* p __attribute__((unused)))
 {
-  bluegiga_send ();
+  bluegiga_send();
+}
+static void trans_cb (struct spi_transaction *trans __attribute__((unused)))
+{
+  bluegiga_receive();
 }
 
 void bluegiga_init (void)
@@ -82,19 +87,18 @@ void bluegiga_init (void)
   bluegiga_spi.dss            = SPIDss8bit;
   bluegiga_spi.bitorder       = SPIMSBFirst;
   bluegiga_spi.cdiv           = SPIDiv64;
+  bluegiga_spi.after_cb       = (SPICallback)trans_cb;
 
   // initialize peripheral variables
-  bluegiga_p.tx_running       = 0;
   bluegiga_p.rx_insert_idx    = 0;
   bluegiga_p.rx_extract_idx   = 0;
   bluegiga_p.tx_insert_idx    = 0;
   bluegiga_p.tx_extract_idx   = 0;
 
   for (int i = 0; i < bluegiga_spi.input_length; i++)
-  {
     bluegiga_p.work_rx[i] = 0;
+  for (int i = 0; i < bluegiga_spi.output_length; i++)
     bluegiga_p.work_tx[i] = 0;
-  }
 
   // Configure generic device
   bluegiga_p.device.periph    = (void *) (&bluegiga_p);
@@ -108,6 +112,8 @@ void bluegiga_init (void)
 
   // register spi slave read for transaction
   spi_slave_register (&(BLUEGIGA_SPI_DEV), &bluegiga_spi);
+
+  coms_status = BLUEGIGA_UNINIT;
 }
 
 /* safe increment of circular buffer */
@@ -119,19 +125,16 @@ void bluegiga_increment_buf(uint8_t *buf_idx, uint8_t len)
 /* Add one byte to the end of tx circular buffer */
 void bluegiga_transmit (uint8_t data)
 {
-  if (BlueGigaCheckFreeSpace() && bluegiga_p.tx_running)
-    {
-      bluegiga_p.tx_buf[bluegiga_p.tx_insert_idx] = data;
-      bluegiga_increment_buf(&bluegiga_p.tx_insert_idx, 1);
-    }
+  if (BlueGigaCheckFreeSpace() && coms_status != BLUEGIGA_UNINIT)
+  {
+    bluegiga_p.tx_buf[bluegiga_p.tx_insert_idx] = data;
+    bluegiga_increment_buf(&bluegiga_p.tx_insert_idx, 1);
+  }
 }
 
 /* Send data in transmit buffer to spi master */
 void bluegiga_send ()
 {
-  //if(bluegiga_spi.status != SPITransPending)
-  //  return;
-
   uint8_t packet_len;
 
   // check data available in buffer to send
@@ -139,7 +142,7 @@ void bluegiga_send ()
   if (packet_len > 19)
     packet_len = 19;
 
-  if (packet_len)
+  if (packet_len && coms_status == BLUEGIGA_IDLE)
   {
     uint8_t i;
     // attach header with data length of real data in 20 char data string
@@ -156,18 +159,13 @@ void bluegiga_send ()
 
     // Test data integrity
     for (i = 0; i < bluegiga_spi.output_length; i++)
-      bluegiga_p.work_tx[i] = i+1;
+      bluegiga_p.work_tx[i] = 2;
 
     // Now send off spi transaction!
     // trigger interrupt on BlueGiga to listen on spi
     gpio_clear (BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);
-    while(bluegiga_spi.status != SPITransSuccess);
-    // reset interrupt pin
-    gpio_set (BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);
 
-    // clear tx buffer
-    for (i = 0; i < bluegiga_spi.output_length; i++)
-      bluegiga_p.work_tx[i] = 0;
+    coms_status = BLUEGIGA_SENDING;
   }
 }
 
@@ -176,40 +174,57 @@ void bluegiga_receive ( void )
 {
   if (bluegiga_spi.status == SPITransSuccess)
   {
-    LED_TOGGLE(3);
-    bluegiga_spi.status = SPITransDone;
-    if (!bluegiga_p.tx_running) bluegiga_p.tx_running = 1;
-
     uint8_t packet_len = bluegiga_p.work_rx[0];
 
     if (packet_len > bluegiga_spi.input_length)
     {
-      // connection lost event
-      bluegiga_p.tx_running = 0;
-      // reinitialize peripheral variables
-      bluegiga_p.rx_insert_idx    = 0;
-      bluegiga_p.rx_extract_idx   = 0;
-      bluegiga_p.tx_insert_idx    = 0;
-      bluegiga_p.tx_extract_idx   = 0;
+/*
+      // Direct message from Bluegiga
+      switch( packet_length )
+      {
+      case 0xff:
+        // Connection lost with ground station!
+        // Stop datalink
+        bluegiga_p.rx_insert_idx    = 0;
+        bluegiga_p.rx_extract_idx   = 0;
+        bluegiga_p.tx_insert_idx    = 0;
+        bluegiga_p.tx_extract_idx   = 0;
 
-      LED_OFF(3);
-
-      spi_slave_register (&(BLUEGIGA_SPI_DEV), &bluegiga_spi);
-
-      return;
+        LED_OFF(3);
+        coms_status = BLUEGIGA_UNINIT;
+        break;
+      default:
+        break;
+      }
+      break;
+*/
+      ;
     }
 
-    uint8_t i;
-    for (i = 0; i < packet_len; i++)
+    // handle incoming datalink message
+    else
     {
-      bluegiga_p.rx_buf[(bluegiga_p.rx_insert_idx + i) % BLUEGIGA_BUFFER_SIZE] = bluegiga_p.work_rx[i + 1];
+      switch(coms_status)
+      {
+        case BLUEGIGA_SENDING:
+          // Handle successful sent message
+          gpio_set (BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);    // Reset interrupt pin
+          for (uint8_t i = 0; i < bluegiga_spi.output_length; i++)  // Clear tx buffer
+            bluegiga_p.work_tx[i] = 0;
+        case BLUEGIGA_IDLE:
+          // Handle received message
+          for (uint8_t i = 0; i < packet_len; i++)
+            bluegiga_p.rx_buf[(bluegiga_p.rx_insert_idx + i) % BLUEGIGA_BUFFER_SIZE] = bluegiga_p.work_rx[i + 1];
+          bluegiga_increment_buf(&bluegiga_p.rx_insert_idx, packet_len);
+        default:
+          LED_TOGGLE(3);
+          coms_status = BLUEGIGA_IDLE;
+      }
     }
-    bluegiga_increment_buf(&bluegiga_p.rx_insert_idx, packet_len);
 
     // clear rx buffer
-    for (i = 0; i < bluegiga_spi.output_length; i++)
+    for (uint8_t i = 0; i < bluegiga_spi.input_length; i++)
       bluegiga_p.work_rx[i] = 0;
-
     // register spi slave read for next transaction
     spi_slave_register (&(BLUEGIGA_SPI_DEV), &bluegiga_spi);
   }

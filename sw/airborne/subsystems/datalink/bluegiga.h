@@ -21,7 +21,7 @@
 
 /**
  * @file subsystems/datalink/bluegiga.h
- * bluegiga Bluetooth chip I/O
+ * Bluegiga Bluetooth chip I/O
  */
 
 #ifndef BLUEGIGA_DATA_LINK_H
@@ -30,8 +30,14 @@
 #include "mcu_periph/link_device.h"
 #include "generated/airframe.h"
 
-// buffer max value: 256
-#define BLUEGIGA_BUFFER_SIZE 128
+/* The different statuses the communication can be in */
+enum BlueGigaStatus {
+  BLUEGIGA_UNINIT,                /**< The com isn't initialized */
+  BLUEGIGA_IDLE,                  /**< The com is in idle */
+  BLUEGIGA_SENDING                /**< The com is sending */
+};
+
+#define BLUEGIGA_BUFFER_SIZE 128    // buffer max value: 256
 
 struct bluegiga_periph {
   /* Receive buffer */
@@ -42,7 +48,6 @@ struct bluegiga_periph {
   uint8_t tx_buf[BLUEGIGA_BUFFER_SIZE];
   uint8_t tx_insert_idx;
   uint8_t tx_extract_idx;
-  uint8_t tx_running;
   /* transmit and receive buffers */
   uint8_t work_tx[32];
   uint8_t work_rx[32];
@@ -100,7 +105,6 @@ static inline void bluegiga_read_buffer( struct pprz_transport *t ) {
 // transmit previous date in buffer
 #define BlueGigaCheckAndParse(_dev,_trans) {    \
   bluegiga_send();                              \
-  bluegiga_receive();                           \
   if (BlueGigaChAvailable())                    \
     bluegiga_read_buffer( &(_trans) );          \
 }
