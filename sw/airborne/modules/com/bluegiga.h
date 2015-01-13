@@ -26,6 +26,8 @@
 #ifndef BLUEGIGA_H
 #define BLUEGIGA_H
 
+extern int8_t rssi;
+
 extern void bluegiga_init(void);
 // extern void bluegiga_periodic(void);
 extern void bluegiga_event(void);

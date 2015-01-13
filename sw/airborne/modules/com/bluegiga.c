@@ -29,6 +29,20 @@
 #include "mcu_periph/spi.h"
 #include "led.h"
 
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
+#include <stdlib.h>
+
+#define PORT 12345
+
+int8_t rssi;
 
 /* The structure for the cyrf6936 chip that handles all the buffers and requests */
 struct BlueGigaDev {
@@ -41,9 +55,14 @@ struct BlueGigaDev {
 
 struct BlueGigaDev bluegiga_dev;
 
+int sock,bytes_recv,sin_size;
+struct sockaddr_in server_addr;
+struct hostent *host;
+char send_data[1024],recv_data[1024];
+
 void bluegiga_init()
 {
-  gpio_setup_output(GPIOC, GPIO6);
+  /*gpio_setup_output(GPIOC, GPIO6);
 
   bluegiga_dev.spi_p = &spi2;
 
@@ -69,12 +88,33 @@ void bluegiga_init()
   bluegiga_dev.activated = 0;
   LED_INIT(3);
 
-  spi_slave_register(bluegiga_dev.spi_p, &(bluegiga_dev.spi_t));
+  spi_slave_register(bluegiga_dev.spi_p, &(bluegiga_dev.spi_t));*/
+
+  host= (struct hostent *) gethostbyname((char *)"127.0.0.1");
+
+  if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+  {
+  perror("socket");
+  exit(1);
+  }
+
+  server_addr.sin_family = AF_INET;
+  server_addr.sin_port = htons(5000);
+  server_addr.sin_addr = *((struct in_addr *)host->h_addr);
+  bzero(&(server_addr.sin_zero),8);
+  sin_size = sizeof(struct sockaddr);
+
 }
 
 uint8_t counter = 0;
-//void bluegiga_periodic()
-//{
+void bluegiga_periodic()
+{
+  bytes_recv = recvfrom(sock,recv_data,1024,0,(struct sockaddr *)&server_addr,&sin_size);
+  recv_data[bytes_recv]= '\0';
+
+  rssi = stoi(recv_data);
+  printf("rssi: %d\n",rssi);
+
   //uint16_t rx_value = 0x42;
 
   //if (bluegiga_dev.activated)
@@ -93,13 +133,13 @@ uint8_t counter = 0;
 
   // Submit the transaction
   //spi_submit(bluegiga_dev.spi_p, &(bluegiga_dev.spi_t));
-//}
+}
 
 void bluegiga_event()
 {
   //if ((SPI_SR(SPI2) & SPI_SR_TXE))
   //  spi_send(SPI2, counter++);
-  if(bluegiga_dev.spi_t.status == SPITransSuccess)
+/*  if(bluegiga_dev.spi_t.status == SPITransSuccess)
   {
       //if ( counter % 5 )
 	LED_TOGGLE(3);
@@ -117,7 +157,7 @@ void bluegiga_event()
     }
 
     spi_slave_register(bluegiga_dev.spi_p, &(bluegiga_dev.spi_t));
-  }
+  }*/
 }
 
 
