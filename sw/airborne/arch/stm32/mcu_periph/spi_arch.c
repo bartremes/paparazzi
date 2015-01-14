@@ -1363,9 +1363,9 @@ void spi2_slave_arch_init(void) {
                 GPIO_CNF_OUTPUT_ALTFN_PUSHPULL,
                 GPIO_SPI2_MISO);
 
-  //gpio_set_mode(GPIO_BANK_SPI2_NSS, GPIO_MODE_INPUT,
-  //                GPIO_CNF_INPUT_FLOAT,
-  //                GPIO_SPI2_NSS);
+  gpio_set_mode(GPIOB, GPIO_MODE_INPUT,
+                  GPIO_CNF_INPUT_FLOAT,
+                  GIO12);
 
   // reset SPI
   spi_reset(SPI2);
