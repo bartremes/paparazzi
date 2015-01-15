@@ -40,21 +40,20 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define PORT 12345
-
-int8_t rssi;
+int8_t rssi = {0,0,0,0,0,0,0,0};
+int8_t k_rssi = 0;
 
 /* The structure for the cyrf6936 chip that handles all the buffers and requests */
-struct BlueGigaDev {
+/*struct BlueGigaDev {
   int activated;
-  struct spi_periph *spi_p;                 /**< The SPI peripheral for the connection */
-  struct spi_transaction spi_t;             /**< The SPI transaction used for the writing and reading of registers */
-  uint8_t input_buf[32];                    /**< The input buffer for the SPI transaction */
-  uint8_t output_buf[32];                   /**< The output buffer for the SPI transaction */
+  struct spi_periph *spi_p;                 *< The SPI peripheral for the connection
+  struct spi_transaction spi_t;             *< The SPI transaction used for the writing and reading of registers
+  uint8_t input_buf[32];                    *< The input buffer for the SPI transaction
+  uint8_t output_buf[32];                   *< The output buffer for the SPI transaction
 };
 
 struct BlueGigaDev bluegiga_dev;
-
+*/
 int sock,bytes_recv,sin_size;
 struct sockaddr_in server_addr;
 struct hostent *host;
@@ -92,6 +91,7 @@ void bluegiga_init()
 
   host= (struct hostent *) gethostbyname((char *)"127.0.0.1");
 
+
   if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
   {
   perror("socket");
@@ -104,16 +104,22 @@ void bluegiga_init()
   bzero(&(server_addr.sin_zero),8);
   sin_size = sizeof(struct sockaddr);
 
+  strcpy(send_data,"1");
+
 }
 
 uint8_t counter = 0;
 void bluegiga_periodic()
 {
+  sendto(sock, send_data, strlen(send_data), 0,
+                (struct sockaddr *)&server_addr, sizeof(struct sockaddr));
   bytes_recv = recvfrom(sock,recv_data,1024,0,(struct sockaddr *)&server_addr,&sin_size);
-  recv_data[bytes_recv]= '\0';
+  // recv_data[bytes_recv]= '\0';
 
-  rssi = stoi(recv_data);
-  printf("rssi: %d\n",rssi);
+  k_rssi = bytes_recv;
+  for (int i = 0; i< k_rssi; i++){
+    rssi[i] = (unsigned int)(recv_data[i]);
+  }
 
   //uint16_t rx_value = 0x42;
 

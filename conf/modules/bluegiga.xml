@@ -2,19 +2,19 @@
 
 <module name="bluegiga" dir="com">
   <doc>
-    <description>Communicate through BlueGiga SPI modules</description>
+    <description>Get Bluegiga rssi</description>
   </doc>
   <header>
     <file name="bluegiga.h"/>
   </header>
   <init fun="bluegiga_init()"/>
-  <!-- <periodic fun="bluegiga_periodic()" freq="20" autorun="TRUE"/> -->
+  <periodic fun="bluegiga_periodic()" freq="20" autorun="TRUE"/>
   <event fun="bluegiga_event()"/>
   <makefile>
     <file name="bluegiga.c"/>
-    <define name="USE_SPI2_SLAVE"/>
-    <define name="SPI_SLAVE"/>
-    <define name="SPI2_SLAVE_NO_NSS"/>
+    <!--<define name="USE_SPI2_SLAVE"/>-->
+    <!--<define name="SPI_SLAVE"/>-->
+    <!--<define name="SPI2_SLAVE_NO_NSS"/>-->
   </makefile>
 </module>
 
