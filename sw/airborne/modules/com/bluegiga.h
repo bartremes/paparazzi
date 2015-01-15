@@ -26,11 +26,12 @@
 #ifndef BLUEGIGA_H
 #define BLUEGIGA_H
 
-extern int8_t rssi;
+extern signed char rssi[];
+extern char k_rssi;
 
-extern void bluegiga_init(void);
-// extern void bluegiga_periodic(void);
-extern void bluegiga_event(void);
+extern void bluegiga_com_init(void);
+extern void bluegiga_com_periodic(void);
+extern void bluegiga_com_event(void);
 
 #endif
 

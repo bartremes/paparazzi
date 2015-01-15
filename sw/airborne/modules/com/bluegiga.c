@@ -40,8 +40,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-int8_t rssi = {0,0,0,0,0,0,0,0};
-int8_t k_rssi = 0;
+signed char rssi[8];
+char k_rssi = 0;
 
 /* The structure for the cyrf6936 chip that handles all the buffers and requests */
 /*struct BlueGigaDev {
@@ -59,7 +59,7 @@ struct sockaddr_in server_addr;
 struct hostent *host;
 char send_data[1024],recv_data[1024];
 
-void bluegiga_init()
+void bluegiga_com_init()
 {
   /*gpio_setup_output(GPIOC, GPIO6);
 
@@ -109,16 +109,22 @@ void bluegiga_init()
 }
 
 uint8_t counter = 0;
-void bluegiga_periodic()
+void bluegiga_com_periodic()
 {
-  sendto(sock, send_data, strlen(send_data), 0,
+  sendto(sock, send_data, strlen(send_data), MSG_DONTWAIT,
                 (struct sockaddr *)&server_addr, sizeof(struct sockaddr));
-  bytes_recv = recvfrom(sock,recv_data,1024,0,(struct sockaddr *)&server_addr,&sin_size);
+
+  bytes_recv = recvfrom(sock,recv_data,1024,MSG_DONTWAIT,(struct sockaddr *)&server_addr,(socklen_t *)&sin_size);
   // recv_data[bytes_recv]= '\0';
 
-  k_rssi = bytes_recv;
-  for (int i = 0; i< k_rssi; i++){
-    rssi[i] = (unsigned int)(recv_data[i]);
+  if (bytes_recv > 0){
+    k_rssi = bytes_recv;
+    printf("Paparazzi rssi: ");
+    for (int i = 0; i< k_rssi; i++){
+      rssi[i] = (signed char) recv_data[i];
+      printf("%d ",rssi[i]);
+    }
+    printf("\n");
   }
 
   //uint16_t rx_value = 0x42;
@@ -141,7 +147,7 @@ void bluegiga_periodic()
   //spi_submit(bluegiga_dev.spi_p, &(bluegiga_dev.spi_t));
 }
 
-void bluegiga_event()
+void bluegiga_com_event()
 {
   //if ((SPI_SR(SPI2) & SPI_SR_TXE))
   //  spi_send(SPI2, counter++);
