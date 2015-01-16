@@ -57,11 +57,11 @@ struct bluegiga_periph {
 
 extern struct bluegiga_periph bluegiga_p;
 
-void bluegiga_init( void );
+void bluegiga_init(void);
 bool_t bluegiga_check_free_space(int len);
-void bluegiga_transmit( uint8_t data );
-void bluegiga_receive( void );
-void bluegiga_send( void );
+void bluegiga_transmit(uint8_t data);
+void bluegiga_receive(void);
+void bluegiga_send(void);
 void bluegiga_increment_buf(uint8_t *buf_idx, uint8_t len);
 
 // Defines that are done in mcu_periph on behalf of uart.
@@ -77,22 +77,22 @@ void bluegiga_increment_buf(uint8_t *buf_idx, uint8_t len);
 // BLUEGIGA needs a specific read_buffer function
 #include "subsystems/datalink/pprz_transport.h"
 
-static inline void bluegiga_read_buffer( struct pprz_transport *t ) {
+static inline void bluegiga_read_buffer(struct pprz_transport *t)
+{
   do {
     int c = 0;
-    do
-    {
-      parse_pprz( t, bluegiga_p.rx_buf[(bluegiga_p.rx_extract_idx + c++) % BLUEGIGA_BUFFER_SIZE]);
-    } while (((bluegiga_p.rx_extract_idx + c)%BLUEGIGA_BUFFER_SIZE != bluegiga_p.rx_insert_idx ) && !(t->trans_rx.msg_received) );
+    do {
+      parse_pprz(t, bluegiga_p.rx_buf[(bluegiga_p.rx_extract_idx + c++) % BLUEGIGA_BUFFER_SIZE]);
+    } while (((bluegiga_p.rx_extract_idx + c) % BLUEGIGA_BUFFER_SIZE != bluegiga_p.rx_insert_idx)
+             && !(t->trans_rx.msg_received));
     // reached end of circular read buffer or message received
     // if received, decode and advance
-    if (t->trans_rx.msg_received)
-      {
-        pprz_parse_payload(t);
-        t->trans_rx.msg_received = FALSE;
-        bluegiga_increment_buf(&bluegiga_p.rx_extract_idx, c);
-      }
-  } while(t->status != UNINIT); // continue till all messages read
+    if (t->trans_rx.msg_received) {
+      pprz_parse_payload(t);
+      t->trans_rx.msg_received = FALSE;
+      bluegiga_increment_buf(&bluegiga_p.rx_extract_idx, c);
+    }
+  } while (t->status != UNINIT); // continue till all messages read
 }
 
 // Device interface macros
@@ -104,10 +104,10 @@ static inline void bluegiga_read_buffer( struct pprz_transport *t ) {
 #define BlueGigaGetch() bluegiga_getch()
 // transmit previous date in buffer
 #define BlueGigaCheckAndParse(_dev,_trans) {    \
-  bluegiga_send();                              \
-  if (BlueGigaChAvailable())                    \
-    bluegiga_read_buffer( &(_trans) );          \
-}
+    bluegiga_send();                              \
+    if (BlueGigaChAvailable())                    \
+      bluegiga_read_buffer( &(_trans) );          \
+  }
 
 #endif /* BLUEGIGA_DATA_LINK_H */
 

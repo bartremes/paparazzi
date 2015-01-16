@@ -54,10 +54,10 @@ char k_rssi = 0;
 
 struct BlueGigaDev bluegiga_dev;
 */
-int sock,bytes_recv,sin_size;
+int sock, bytes_recv, sin_size;
 struct sockaddr_in server_addr;
 struct hostent *host;
-char send_data[1024],recv_data[1024];
+char send_data[1024], recv_data[1024];
 
 void bluegiga_com_init()
 {
@@ -89,22 +89,21 @@ void bluegiga_com_init()
 
   spi_slave_register(bluegiga_dev.spi_p, &(bluegiga_dev.spi_t));*/
 
-  host= (struct hostent *) gethostbyname((char *)"127.0.0.1");
+  host = (struct hostent *) gethostbyname((char *)"127.0.0.1");
 
 
-  if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
-  {
-  perror("socket");
-  exit(1);
+  if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
+    perror("socket");
+    exit(1);
   }
 
   server_addr.sin_family = AF_INET;
   server_addr.sin_port = htons(5000);
   server_addr.sin_addr = *((struct in_addr *)host->h_addr);
-  bzero(&(server_addr.sin_zero),8);
+  bzero(&(server_addr.sin_zero), 8);
   sin_size = sizeof(struct sockaddr);
 
-  strcpy(send_data,"1");
+  strcpy(send_data, "1");
 
 }
 
@@ -112,17 +111,17 @@ uint8_t counter = 0;
 void bluegiga_com_periodic()
 {
   sendto(sock, send_data, strlen(send_data), MSG_DONTWAIT,
-                (struct sockaddr *)&server_addr, sizeof(struct sockaddr));
+         (struct sockaddr *)&server_addr, sizeof(struct sockaddr));
 
-  bytes_recv = recvfrom(sock,recv_data,1024,MSG_DONTWAIT,(struct sockaddr *)&server_addr,(socklen_t *)&sin_size);
+  bytes_recv = recvfrom(sock, recv_data, 1024, MSG_DONTWAIT, (struct sockaddr *)&server_addr, (socklen_t *)&sin_size);
   // recv_data[bytes_recv]= '\0';
 
-  if (bytes_recv > 0){
+  if (bytes_recv > 0) {
     k_rssi = bytes_recv;
     printf("Paparazzi rssi: ");
-    for (int i = 0; i< k_rssi; i++){
+    for (int i = 0; i < k_rssi; i++) {
       rssi[i] = (signed char) recv_data[i];
-      printf("%d ",rssi[i]);
+      printf("%d ", rssi[i]);
     }
     printf("\n");
   }
@@ -151,25 +150,25 @@ void bluegiga_com_event()
 {
   //if ((SPI_SR(SPI2) & SPI_SR_TXE))
   //  spi_send(SPI2, counter++);
-/*  if(bluegiga_dev.spi_t.status == SPITransSuccess)
-  {
-      //if ( counter % 5 )
-	LED_TOGGLE(3);
-    //if (!bluegiga_dev.activated)
-    //  bluegiga_dev.activated = 1;
-
-    //gpio_toggle(GPIOC, GPIO6);
-    bluegiga_dev.output_buf[0] = counter++;
-    bluegiga_dev.spi_t.input_length = 20;
-    bluegiga_dev.spi_t.output_length = 20;
-    for (int i=1;i<32;i++)
+  /*  if(bluegiga_dev.spi_t.status == SPITransSuccess)
     {
-      bluegiga_dev.input_buf[i] = i;
-      bluegiga_dev.output_buf[i] = i;
-    }
+        //if ( counter % 5 )
+    LED_TOGGLE(3);
+      //if (!bluegiga_dev.activated)
+      //  bluegiga_dev.activated = 1;
 
-    spi_slave_register(bluegiga_dev.spi_p, &(bluegiga_dev.spi_t));
-  }*/
+      //gpio_toggle(GPIOC, GPIO6);
+      bluegiga_dev.output_buf[0] = counter++;
+      bluegiga_dev.spi_t.input_length = 20;
+      bluegiga_dev.spi_t.output_length = 20;
+      for (int i=1;i<32;i++)
+      {
+        bluegiga_dev.input_buf[i] = i;
+        bluegiga_dev.output_buf[i] = i;
+      }
+
+      spi_slave_register(bluegiga_dev.spi_p, &(bluegiga_dev.spi_t));
+    }*/
 }
 
 

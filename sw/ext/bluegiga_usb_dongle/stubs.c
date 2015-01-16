@@ -8,7 +8,7 @@
  ****************************************************************************/
 
 #include "cmd_def.h"
-void ble_default(const void*v)
+void ble_default(const void *v)
 {
 }
 
@@ -16,45 +16,45 @@ void ble_rsp_attributes_send(const struct ble_msg_attributes_send_rsp_t *msg)
 {
 }
 
-void ble_rsp_hardware_set_rxgain(const void*nul)
+void ble_rsp_hardware_set_rxgain(const void *nul)
 {
 
 }
 
-void ble_rsp_system_aes_setkey(const void*nul)
+void ble_rsp_system_aes_setkey(const void *nul)
 {
 
 }
 
-void ble_rsp_system_aes_encrypt(const struct ble_msg_system_aes_encrypt_rsp_t*msg)
+void ble_rsp_system_aes_encrypt(const struct ble_msg_system_aes_encrypt_rsp_t *msg)
 {
 
 }
 
-void ble_rsp_system_aes_decrypt(const struct ble_msg_system_aes_decrypt_rsp_t*msg)
+void ble_rsp_system_aes_decrypt(const struct ble_msg_system_aes_decrypt_rsp_t *msg)
 {
 
 }
 
-void ble_rsp_flash_read_data(const struct ble_msg_flash_read_data_rsp_t*msg)
+void ble_rsp_flash_read_data(const struct ble_msg_flash_read_data_rsp_t *msg)
 {
 
 }
 
-void ble_rsp_test_channel_mode(const void*nul)
+void ble_rsp_test_channel_mode(const void *nul)
 {
 
 }
 
-void ble_evt_system_protocol_error(const struct ble_msg_system_protocol_error_evt_t*msg)
+void ble_evt_system_protocol_error(const struct ble_msg_system_protocol_error_evt_t *msg)
 {
 }
 
-void ble_rsp_system_reset(const void* nul)
+void ble_rsp_system_reset(const void *nul)
 {
 }
 
-void ble_rsp_system_hello(const void* nul)
+void ble_rsp_system_hello(const void *nul)
 {
 }
 
@@ -94,7 +94,7 @@ void ble_rsp_system_whitelist_remove(const struct ble_msg_system_whitelist_remov
 {
 }
 
-void ble_rsp_system_whitelist_clear(const void* nul)
+void ble_rsp_system_whitelist_clear(const void *nul)
 {
 }
 
@@ -110,15 +110,15 @@ void ble_rsp_hardware_usb_enable(const struct ble_msg_hardware_usb_enable_rsp_t 
 {
 }
 
-void ble_rsp_flash_ps_defrag(const void* nul)
+void ble_rsp_flash_ps_defrag(const void *nul)
 {
 }
 
-void ble_rsp_flash_ps_dump(const void* nul)
+void ble_rsp_flash_ps_dump(const void *nul)
 {
 }
 
-void ble_rsp_flash_ps_erase_all(const void* nul)
+void ble_rsp_flash_ps_erase_all(const void *nul)
 {
 }
 
@@ -130,7 +130,7 @@ void ble_rsp_flash_ps_load(const struct ble_msg_flash_ps_load_rsp_t *msg)
 {
 }
 
-void ble_rsp_flash_ps_erase(const void* nul)
+void ble_rsp_flash_ps_erase(const void *nul)
 {
 }
 
@@ -138,7 +138,7 @@ void ble_rsp_flash_erase_page(const struct ble_msg_flash_erase_page_rsp_t *msg)
 {
 }
 
-void ble_rsp_flash_write_data(const struct ble_msg_flash_write_data_rsp_t * msg)
+void ble_rsp_flash_write_data(const struct ble_msg_flash_write_data_rsp_t *msg)
 {
 }
 
@@ -154,11 +154,11 @@ void ble_rsp_attributes_read_type(const struct ble_msg_attributes_read_type_rsp_
 {
 }
 
-void ble_rsp_attributes_user_read_response(const void* nul)
+void ble_rsp_attributes_user_read_response(const void *nul)
 {
 }
 
-void ble_rsp_attributes_user_write_response(const void* nul)
+void ble_rsp_attributes_user_write_response(const void *nul)
 {
 }
 
@@ -250,7 +250,7 @@ void ble_rsp_sm_encrypt_start(const struct ble_msg_sm_encrypt_start_rsp_t *msg)
 {
 }
 
-void ble_rsp_sm_set_bondable_mode(const void* nul)
+void ble_rsp_sm_set_bondable_mode(const void *nul)
 {
 }
 
@@ -258,7 +258,7 @@ void ble_rsp_sm_delete_bonding(const struct ble_msg_sm_delete_bonding_rsp_t *msg
 {
 }
 
-void ble_rsp_sm_set_parameters(const void* nul)
+void ble_rsp_sm_set_parameters(const void *nul)
 {
 }
 
@@ -270,7 +270,7 @@ void ble_rsp_sm_get_bonds(const struct ble_msg_sm_get_bonds_rsp_t *msg)
 {
 }
 
-void ble_rsp_sm_set_oob_data(const void* nul)
+void ble_rsp_sm_set_oob_data(const void *nul)
 {
 }
 
@@ -278,7 +278,7 @@ void ble_rsp_sm_whitelist_bonds(const struct ble_msg_sm_whitelist_bonds_rsp_t *m
 {
 }
 
-void ble_rsp_gap_set_privacy_flags(const void* nul)
+void ble_rsp_gap_set_privacy_flags(const void *nul)
 {
 }
 
@@ -370,7 +370,7 @@ void ble_rsp_hardware_i2c_write(const struct ble_msg_hardware_i2c_write_rsp_t *m
 {
 }
 
-void ble_rsp_hardware_set_txpower(const void* nul)
+void ble_rsp_hardware_set_txpower(const void *nul)
 {
 }
 
@@ -394,15 +394,16 @@ void ble_rsp_hardware_analog_comparator_read(const struct ble_msg_hardware_analo
 {
 }
 
-void ble_rsp_hardware_analog_comparator_config_irq(const struct ble_msg_hardware_analog_comparator_config_irq_rsp_t *msg)
+void ble_rsp_hardware_analog_comparator_config_irq(const struct ble_msg_hardware_analog_comparator_config_irq_rsp_t
+    *msg)
 {
 }
 
-void ble_rsp_test_phy_tx(const void* nul)
+void ble_rsp_test_phy_tx(const void *nul)
 {
 }
 
-void ble_rsp_test_phy_rx(const void* nul)
+void ble_rsp_test_phy_rx(const void *nul)
 {
 }
 
@@ -410,7 +411,7 @@ void ble_rsp_test_phy_end(const struct ble_msg_test_phy_end_rsp_t *msg)
 {
 }
 
-void ble_rsp_test_phy_reset(const void* nul)
+void ble_rsp_test_phy_reset(const void *nul)
 {
 }
 
@@ -442,7 +443,7 @@ void ble_evt_system_script_failure(const struct ble_msg_system_script_failure_ev
 {
 }
 
-void ble_evt_system_no_license_key(const void* nul)
+void ble_evt_system_no_license_key(const void *nul)
 {
 }
 
