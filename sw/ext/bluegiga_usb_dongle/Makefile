@@ -2,7 +2,7 @@ TARGET = bluetooth-proximity
  
 SRCS := $(wildcard *.c)
 OBJS := $(SRCS:.c=.o)
-DEPS := $(SRCS:.c=.d)
+#DEPS := $(SRCS:.c=.d)
  
 CROSS_COMPILE   ?= arm-linux-gnueabi-
 CC              := $(CROSS_COMPILE)gcc
@@ -12,7 +12,7 @@ LDFLAGS         := -Wl,--no-undefined -Wl,--as-needed
 all: $(TARGET)
 
 %.o: %.c
-	$(CC) -O3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
+	$(CC) -O3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.c)" -MT"$(@:%.o=%.c)" -o"$@" "$<"
  
 $(TARGET): $(OBJS)
 	@echo 'Building target: $@'
@@ -23,16 +23,19 @@ clean:
 	-$(RM) $(OBJS) $(DEPS) $(TARGET).elf
  
  #include $(PAPARAZZI_SRC)/conf/Makefile.linux
- 
+PAPARAZZI_SRC = ../../..
 DRONE = $(PAPARAZZI_SRC)/sw/tools/parrot/ardrone2.py
 
 SUB_DIR = bl
 
+HOST = 192.168.1.1
+
  # Program the device and start it.
-upload program: $(TARGET).elf
+upload_program: $(TARGET).elf
 	#$(Q)$(DRONE) --host=$(HOST) upload_file $(TARGET).elf $(SUB_DIR)
 	$(Q)$(DRONE) --host=$(HOST) insmod cdc-acm.ko
-	$(Q)$(DRONE) --host=$(HOST) upload_file_and_run $(TARGET).elf $(SUB_DIR)
+	$(Q)$(DRONE) --host=$(HOST) upload_file_and_run $(TARGET).elf .
 	$(Q)$(DRONE) --host=$(HOST) status
+	# --host=$(HOST)
 
 .PHONY: all clean

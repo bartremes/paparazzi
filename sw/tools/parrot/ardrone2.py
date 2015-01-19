@@ -376,8 +376,9 @@ elif args.command == 'insmod':
     modfile = parrot_utils.split_into_path_and_file(args.file)
     print('Uploading \'' + modfile[1])
     parrot_utils.uploadfile(ftp, modfile[1], file(args.file, "rb"))
+    print('Upload successful')
     print(parrot_utils.execute_command(tn,"insmod /data/video/" + modfile[1]))
-
+	
 elif args.command == 'upload_file_and_run':
     # Split filename and path
     f = parrot_utils.split_into_path_and_file(args.file)
