@@ -2,7 +2,7 @@ TARGET = bluetooth-proximity
  
 SRCS := $(wildcard *.c)
 OBJS := $(SRCS:.c=.o)
-#DEPS := $(SRCS:.c=.d)
+DEPS := $(SRCS:.c=.d)
  
 CROSS_COMPILE   ?= arm-linux-gnueabi-
 CC              := $(CROSS_COMPILE)gcc
@@ -12,7 +12,7 @@ LDFLAGS         := -Wl,--no-undefined -Wl,--as-needed
 all: $(TARGET)
 
 %.o: %.c
-	$(CC) -O3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.c)" -MT"$(@:%.o=%.c)" -o"$@" "$<"
+	$(CC) -O3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
  
 $(TARGET): $(OBJS)
 	@echo 'Building target: $@'
