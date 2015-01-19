@@ -83,7 +83,7 @@ void bluegiga_init(void)
   bluegiga_spi.slave_idx      = BLUEGIGA_SLAVE_IDX;
   bluegiga_spi.select         = SPISelectUnselect;
   bluegiga_spi.cpol           = SPICpolIdleHigh;
-  bluegiga_spi.cpha           = SPICphaEdge2; //SPICphaEdge1;
+  bluegiga_spi.cpha           = SPICphaEdge2;
   bluegiga_spi.dss            = SPIDss8bit;
   bluegiga_spi.bitorder       = SPIMSBFirst;
   bluegiga_spi.cdiv           = SPIDiv64;
@@ -140,30 +140,30 @@ void bluegiga_send()
 
   // check data available in buffer to send
   packet_len = ((bluegiga_p.tx_insert_idx - bluegiga_p.tx_extract_idx + BLUEGIGA_BUFFER_SIZE) % BLUEGIGA_BUFFER_SIZE);
-  if (packet_len > 19) {
-    packet_len = 19;
+  if (packet_len > 18) {
+    packet_len = 18;
   }
 
   if (packet_len && coms_status == BLUEGIGA_IDLE) {
     uint8_t i;
     // attach header with data length of real data in 20 char data string
-    bluegiga_p.work_tx[0] = packet_len;
+    bluegiga_p.work_tx[1] = packet_len;
 
     // copy data from working buffer to spi output buffer
     for (i = 0; i < packet_len; i++) {
-      bluegiga_p.work_tx[i + 1] = bluegiga_p.tx_buf[(bluegiga_p.tx_extract_idx + i) % BLUEGIGA_BUFFER_SIZE];
+      bluegiga_p.work_tx[i + 2] = bluegiga_p.tx_buf[(bluegiga_p.tx_extract_idx + i) % BLUEGIGA_BUFFER_SIZE];
     }
     bluegiga_increment_buf(&bluegiga_p.tx_extract_idx, packet_len);
 
     // clear unused bytes
-    for (i = packet_len + 1; i < bluegiga_spi.output_length; i++) {
+    for (i = packet_len + 2; i < bluegiga_spi.output_length; i++) {
       bluegiga_p.work_tx[i] = 0;
     }
 
     // Test data integrity
-    for (i = 0; i < bluegiga_spi.output_length; i++) {
-      bluegiga_p.work_tx[i] = 2;
-    }
+    //for (i = 0; i < bluegiga_spi.output_length; i++) {
+    //  bluegiga_p.work_tx[i+1] = i+1;
+    //}
 
     // Now send off spi transaction!
     // trigger interrupt on BlueGiga to listen on spi

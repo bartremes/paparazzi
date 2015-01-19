@@ -1364,8 +1364,8 @@ void spi2_slave_arch_init(void) {
                 GPIO_SPI2_MISO);
 
   gpio_set_mode(GPIO_BANK_SPI2_NSS, GPIO_MODE_INPUT,
-                  GPIO_CNF_INPUT_FLOAT,
-		  GPIO_SPI2_NSS);
+                GPIO_CNF_INPUT_FLOAT,
+                GPIO_SPI2_NSS);
 
   // reset SPI
   spi_reset(SPI2);
@@ -1382,13 +1382,17 @@ void spi2_slave_arch_init(void) {
 
   spi_set_slave_mode(SPI2);
 
+#ifdef SPI2_SLAVE_NO_NSS
   spi_enable_software_slave_management(SPI2);
   spi_set_nss_low(SPI2);
+#else
+  spi_disable_software_slave_management(SPI2);
+#endif
 
-  // Enable SPI_1 DMA clock
+  // Enable SPI_2 DMA clock
   rcc_periph_clock_enable(spi2_dma.rcc_dma);
 
-  // Enable SPI1 periph.
+  // Enable SPI2 periph.
   spi_enable(SPI2);
 
   spi_arch_int_enable(&spi2);

@@ -49,8 +49,8 @@ struct bluegiga_periph {
   uint8_t tx_insert_idx;
   uint8_t tx_extract_idx;
   /* transmit and receive buffers */
-  uint8_t work_tx[32];
-  uint8_t work_rx[32];
+  uint8_t work_tx[20];
+  uint8_t work_rx[20];
   /** Generic device interface */
   struct link_device device;
 };
