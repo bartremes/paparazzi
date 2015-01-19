@@ -83,7 +83,7 @@ void bluegiga_init(void)
   bluegiga_spi.slave_idx      = BLUEGIGA_SLAVE_IDX;
   bluegiga_spi.select         = SPISelectUnselect;
   bluegiga_spi.cpol           = SPICpolIdleHigh;
-  bluegiga_spi.cpha           = SPICphaEdge1;
+  bluegiga_spi.cpha           = SPICphaEdge2; //SPICphaEdge1;
   bluegiga_spi.dss            = SPIDss8bit;
   bluegiga_spi.bitorder       = SPIMSBFirst;
   bluegiga_spi.cdiv           = SPIDiv64;
