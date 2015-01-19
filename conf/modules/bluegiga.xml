@@ -8,7 +8,7 @@
     <file name="bluegiga.h"/>
   </header>
   <init fun="bluegiga_com_init()"/>
-  <periodic fun="bluegiga_com_periodic()" freq="20" autorun="TRUE"/>
+  <periodic fun="bluegiga_com_periodic()" freq="40" autorun="TRUE"/>
   <event fun="bluegiga_com_event()"/>
   <makefile>
     <file name="bluegiga.c"/>
