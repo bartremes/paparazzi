@@ -162,7 +162,7 @@ void bluegiga_send()
 
     // Test data integrity
     //for (i = 0; i < bluegiga_spi.output_length; i++) {
-    //  bluegiga_p.work_tx[i+1] = i+1;
+    //  bluegiga_p.work_tx[i] = i+1;
     //}
 
     // Now send off spi transaction!
