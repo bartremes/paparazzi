@@ -96,10 +96,10 @@ const char *state_names[state_last] = {
 #define FIRST_HANDLE 0x0001
 #define LAST_HANDLE  0xffff
 
-#define DRONE_SERVICE_UUID            0x77cc
-#define DRONE_DATA_UUID         0x3cc1
-#define DRONE_DATA_CONFIG_UUID        0x2902
-#define DRONE_BROADCAST_UUID        0x25ec
+#define DRONE_SERVICE_UUID      0x77cc
+#define DRONE_DATA_UUID		0x3cc1
+#define DRONE_DATA_CONFIG_UUID  0x2902
+#define DRONE_BROADCAST_UUID    0x25ec
 
 uint8 primary_service_uuid[] = {0x00, 0x28};
 
@@ -554,18 +554,30 @@ int main(int argc, char *argv[])
 
   ble_cmd_gap_discover(gap_discover_observation);
 
-  int counter = 0;
+  struct timeval tm;
+  double time, old_time;
+  gettimeofday(&tm, NULL);
+  time = (double)tm.tv_sec + (double)tm.tv_usec / 1000000.0;
+  old_time = time;
+
   // Message loop
   while (1) {
-    if (read_message(UART_TIMEOUT) > 0) { break; }
-    if (counter > 7) {
+    if (read_message(UART_TIMEOUT) > 0) {
+	// ble_cmd_gap_end_procedure();
+	// ble_cmd_gap_set_mode(0x80, gap_scannable_non_connectable);
+    }
+    gettimeofday(&tm, NULL);
+    time = (double)tm.tv_sec + (double)tm.tv_usec / 1000000.0;
+
+    if (time-old_time > 0.14) {
       ble_cmd_gap_end_procedure();
       ble_cmd_gap_set_mode(0x80, gap_scannable_non_connectable);
     }
-    if (counter++ > 8) {
+    if (time-old_time > 0.16) {
       ble_cmd_gap_discover(gap_discover_observation);
-      counter = 0;
+      old_time = time;
     }
+
     if (kbhit()) {
       getchar();
       break;
