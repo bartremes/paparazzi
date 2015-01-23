@@ -552,6 +552,8 @@ int main(int argc, char *argv[])
       ble_cmd_gap_connect_direct(&connect_addr, gap_address_type_public, 16, 32, 100, 9);
   }*/
 
+  ble_cmd_gap_set_adv_parameters(0x20,0x20,0x07);
+  ble_cmd_gap_set_scan_parameters(0x40, 0x4A, 1);
   ble_cmd_gap_discover(gap_discover_observation);
 
   struct timeval tm;

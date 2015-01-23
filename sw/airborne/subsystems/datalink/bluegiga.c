@@ -32,6 +32,8 @@
 
 #include "led.h"
 
+int irq_counter = 0;
+
 #ifndef BLUEGIGA_SPI_DEV
 #define BLUEGIGA_SPI_DEV spi2
 #endif
@@ -168,7 +170,7 @@ void bluegiga_send()
     // Now send off spi transaction!
     // trigger interrupt on BlueGiga to listen on spi
     gpio_clear(BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);
-
+    irq_counter = 0;
     coms_status = BLUEGIGA_SENDING;
   }
 }
@@ -177,9 +179,9 @@ void bluegiga_send()
 void bluegiga_receive(void)
 {
   if (bluegiga_spi.status == SPITransSuccess) {
-    uint8_t packet_len = bluegiga_p.work_rx[0];
+    uint8_t packet_len = bluegiga_p.work_rx[1];
 
-    if (packet_len > bluegiga_spi.input_length) {
+    if (packet_len > bluegiga_spi.input_length - 2) {
       /*
             // Direct message from Bluegiga
             switch( packet_length )
@@ -200,7 +202,8 @@ void bluegiga_receive(void)
             }
             break;
       */
-      ;
+       coms_status = BLUEGIGA_UNINIT;
+       gpio_set(BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);     // Reset interrupt pin
     }
 
     // handle incoming datalink message
@@ -215,7 +218,7 @@ void bluegiga_receive(void)
         case BLUEGIGA_IDLE:
           // Handle received message
           for (uint8_t i = 0; i < packet_len; i++) {
-            bluegiga_p.rx_buf[(bluegiga_p.rx_insert_idx + i) % BLUEGIGA_BUFFER_SIZE] = bluegiga_p.work_rx[i + 1];
+            bluegiga_p.rx_buf[(bluegiga_p.rx_insert_idx + i) % BLUEGIGA_BUFFER_SIZE] = bluegiga_p.work_rx[i + 2];
           }
           bluegiga_increment_buf(&bluegiga_p.rx_insert_idx, packet_len);
         default:
@@ -225,10 +228,18 @@ void bluegiga_receive(void)
     }
 
     // clear rx buffer
-    for (uint8_t i = 0; i < bluegiga_spi.input_length; i++) {
-      bluegiga_p.work_rx[i] = 0;
-    }
+    //for (uint8_t i = 0; i < bluegiga_spi.input_length; i++) {
+    //  bluegiga_p.work_rx[i] = 0;
+    //}
     // register spi slave read for next transaction
     spi_slave_register(&(BLUEGIGA_SPI_DEV), &bluegiga_spi);
+  }
+  else{
+      if(++irq_counter > 100){
+        gpio_clear(BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN); // trigger interrupt on BlueGiga to listen on spi
+        irq_counter = 0;
+        coms_status = BLUEGIGA_SENDING;
+      }
+
   }
 }
