@@ -234,12 +234,4 @@ void bluegiga_receive(void)
     // register spi slave read for next transaction
     spi_slave_register(&(BLUEGIGA_SPI_DEV), &bluegiga_spi);
   }
-  else{
-      if(++irq_counter > 100){
-        gpio_clear(BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN); // trigger interrupt on BlueGiga to listen on spi
-        irq_counter = 0;
-        coms_status = BLUEGIGA_SENDING;
-      }
-
-  }
 }
