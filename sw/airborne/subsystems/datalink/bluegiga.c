@@ -169,8 +169,8 @@ void bluegiga_send()
 
     // Now send off spi transaction!
     // trigger interrupt on BlueGiga to listen on spi
-    gpio_clear(BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);
-    irq_counter = 0;
+    //gpio_clear(BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);
+    //irq_counter = 0;
     coms_status = BLUEGIGA_SENDING;
   }
 }
@@ -211,7 +211,7 @@ void bluegiga_receive(void)
       switch (coms_status) {
         case BLUEGIGA_SENDING:
           // Handle successful sent message
-          gpio_set(BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);     // Reset interrupt pin
+          //gpio_set(BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);     // Reset interrupt pin
           for (uint8_t i = 0; i < bluegiga_spi.output_length; i++) { // Clear tx buffer
             bluegiga_p.work_tx[i] = 0;
           }
