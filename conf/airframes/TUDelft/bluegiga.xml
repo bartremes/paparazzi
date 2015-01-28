@@ -206,7 +206,7 @@
 
   <firmware name="rotorcraft">
     <target name="ap" board="lisa_s_1.0">
-      <subsystem name="radio_control" type="ppm"/>
+      <subsystem name="radio_control" type="datalink"/>
       <configure name="AHRS_PROPAGATE_FREQUENCY" value="500"/>
       <configure name="RADIO_CONTROL_LED" value="none"/>
       <define name="USE_PERSISTENT_SETTINGS" value="TRUE"/>

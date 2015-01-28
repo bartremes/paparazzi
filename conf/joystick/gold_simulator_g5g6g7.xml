@@ -7,7 +7,7 @@
     <axis index="3" name="mode" />
   </input>
 
-  <messages period="0.025">
+  <messages period="0.1">
     <message class="datalink" name="RC_4CH" send_always="true">
       <field name="mode" value="Fit(mode,-108,108,0,2)"/>
       <field name="throttle" value="Fit(throttle,-117,117,0,127)" />
