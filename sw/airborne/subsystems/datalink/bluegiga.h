@@ -37,7 +37,7 @@ enum BlueGigaStatus {
   BLUEGIGA_SENDING                /**< The com is sending */
 };
 
-#define BLUEGIGA_BUFFER_SIZE 128    // buffer max value: 256
+#define BLUEGIGA_BUFFER_SIZE 256    // buffer max value: 256
 
 struct bluegiga_periph {
   /* Receive buffer */
