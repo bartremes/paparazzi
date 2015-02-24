@@ -90,9 +90,9 @@ static inline void bluegiga_read_buffer(struct pprz_transport *t)
     if (t->trans_rx.msg_received) {
       pprz_parse_payload(t);
       t->trans_rx.msg_received = FALSE;
-      bluegiga_increment_buf(&bluegiga_p.rx_extract_idx, c);
     }
-  } while (t->status != UNINIT); // continue till all messages read
+    bluegiga_increment_buf(&bluegiga_p.rx_extract_idx, c);
+  } while (bluegiga_p.rx_extract_idx != bluegiga_p.rx_insert_idx);//(t->status != UNINIT); // continue till all messages read
 }
 
 // Device interface macros

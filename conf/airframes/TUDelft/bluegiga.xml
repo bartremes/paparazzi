@@ -199,7 +199,7 @@
  </section>
 
  <modules main_freq="512">
-   <load name="gps_ubx_ucenter.xml"/>
+   <!--<load name="gps_ubx_ucenter.xml"/>-->
    <load name="send_imu_mag_current.xml"/>
    <!--load name="bluegiga.xml"/-->
    </modules>
@@ -234,7 +234,7 @@
     <subsystem name="imu" type="lisa_s_v1.0">
       <define name="LISA_S_UPSIDE_DOWN"/> <!-- Upside down is a relative term. :) -->
     </subsystem>
-    <subsystem name="gps" type="ublox"/>
+    <subsystem name="gps" type="datalink"/>
     <subsystem name="stabilization" type="int_quat"/>
     <subsystem name="ahrs" type="int_cmpl_quat"/>
     <subsystem name="ins"/>
