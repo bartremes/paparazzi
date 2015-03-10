@@ -32,8 +32,6 @@
 
 #include "led.h"
 
-int irq_counter = 0;
-
 #ifndef BLUEGIGA_SPI_DEV
 #define BLUEGIGA_SPI_DEV spi2
 #endif
@@ -53,6 +51,8 @@ int irq_counter = 0;
 enum BlueGigaStatus coms_status;
 struct bluegiga_periph bluegiga_p;
 struct spi_transaction bluegiga_spi;
+
+signed char bluegiga_rssi[256];    // values initialized with 127
 
 // Functions for the generic device API
 static int true_function(struct bluegiga_periph *p __attribute__((unused)), uint8_t len __attribute__((unused)))
@@ -102,6 +102,9 @@ void bluegiga_init(void)
   }
   for (int i = 0; i < bluegiga_spi.output_length; i++) {
     bluegiga_p.work_tx[i] = 0;
+  }
+  for (int i = 0; i < 255; i++) {
+    bluegiga_rssi[i] = 127;
   }
 
   // Configure generic device
@@ -170,12 +173,11 @@ void bluegiga_send()
     // Now send off spi transaction!
     // trigger interrupt on BlueGiga to listen on spi
     //gpio_clear(BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);
-    //irq_counter = 0;
     coms_status = BLUEGIGA_SENDING;
   }
 }
 
-/* read data from dma if available */
+/* read data from dma if available, set as call back of successful spi exchange */
 void bluegiga_receive(void)
 {
   if (bluegiga_spi.status == SPITransSuccess) {
@@ -187,7 +189,7 @@ void bluegiga_receive(void)
       }
     }
 
-    uint8_t packet_len = bluegiga_p.work_rx[1];
+    uint8_t packet_len = bluegiga_p.work_rx[1];                 // length of transmitted message
 
     if (packet_len > bluegiga_spi.input_length) {
       // Direct message from Bluegiga
@@ -209,8 +211,19 @@ void bluegiga_receive(void)
       case 0xfe:
         // rssi data
           k_rssi = bluegiga_p.work_rx[2];
-          for (i = 0; i < k_rssi; i++); // read rssi somewhere
+          for (i = 0; i < k_rssi; i++) // read rssi somewhere
+            bluegiga_rssi[i] = bluegiga_p.work_rx[3+i];
           break;
+      case 0xfd:
+        // interrupt handled on bluegiga
+        gpio_set(BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);     // Reset interrupt pin
+
+        // fetch scan status
+        if (bluegiga_p.work_rx[2] == 1)
+          coms_status = BLUEGIGA_SCANNING;
+        else
+          coms_status = BLUEGIGA_UNINIT;
+        break;
       default:
         break;
       }
@@ -230,10 +243,16 @@ void bluegiga_receive(void)
       coms_status = BLUEGIGA_IDLE;
 
     // clear rx buffer
-    //for (uint8_t i = 0; i < bluegiga_spi.input_length; i++) {
-    //  bluegiga_p.work_rx[i] = 0;
-    //}
+    for (uint8_t i = 0; i < bluegiga_spi.input_length; i++) {
+      bluegiga_p.work_rx[i] = 0;
+    }
     // register spi slave read for next transaction
     spi_slave_register(&(BLUEGIGA_SPI_DEV), &bluegiga_spi);
   }
+}
+
+/* command bluetooth to switch to active scan mode to get rssi values from neighboring drones */
+void bluegiga_scan(void)
+{
+  gpio_clear(BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);     // set interrupt
 }

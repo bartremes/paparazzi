@@ -34,7 +34,8 @@
 enum BlueGigaStatus {
   BLUEGIGA_UNINIT,                /**< The com isn't initialized */
   BLUEGIGA_IDLE,                  /**< The com is in idle */
-  BLUEGIGA_SENDING                /**< The com is sending */
+  BLUEGIGA_SENDING,               /**< The com is sending */
+  BLUEGIGA_SCANNING               /**< The com is switched from data link to rssi scanning */
 };
 
 #define BLUEGIGA_BUFFER_SIZE 256    // buffer max value: 256
@@ -64,13 +65,15 @@ void bluegiga_receive(void);
 void bluegiga_send(void);
 void bluegiga_increment_buf(uint8_t *buf_idx, uint8_t len);
 
-// Defines that are done in mcu_periph on behalf of uart.
-// We need to do these here...
-//TODO: check
-//#define BlueGigaInit() bluegiga_init()
-//#define BlueGigaTxRunning bluegiga_p.tx_running
-//#define BlueGigaSetBaudrate(_b) bluegiga_set_baudrate(_b)
+extern signed char bluegiga_rssi[];    // values initialized with 127
+void bluegiga_scan(void);
 
+// Device interface macros
+#define BlueGigaCheckFreeSpace() (((bluegiga_p.tx_insert_idx+1)%BLUEGIGA_BUFFER_SIZE) != bluegiga_p.tx_extract_idx)
+#define BlueGigaTransmit(_x) bluegiga_transmit(_x)
+#define BlueGigaSendMessage() bluegiga_send()
+#define BlueGigaChAvailable() (bluegiga_p.rx_extract_idx != bluegiga_p.rx_insert_idx)
+#define BlueGigaGetch() bluegiga_getch()
 
 // BLUEGIGA is using pprz_transport
 // FIXME it should not appear here, this will be fixed with the rx improvements some day...
@@ -92,22 +95,14 @@ static inline void bluegiga_read_buffer(struct pprz_transport *t)
       t->trans_rx.msg_received = FALSE;
     }
     bluegiga_increment_buf(&bluegiga_p.rx_extract_idx, c);
-  } while (bluegiga_p.rx_extract_idx != bluegiga_p.rx_insert_idx);//(t->status != UNINIT); // continue till all messages read
+  } while (BlueGigaChAvailable()); // continue till all messages read
 }
 
-// Device interface macros
-#define BlueGigaCheckFreeSpace() (((bluegiga_p.tx_insert_idx+1)%BLUEGIGA_BUFFER_SIZE) != bluegiga_p.tx_extract_idx)
-#define BlueGigaTransmit(_x) bluegiga_transmit(_x)
-#define BlueGigaSendMessage() bluegiga_send()
-#define BlueGigaChAvailable() (bluegiga_p.rx_extract_idx != bluegiga_p.rx_insert_idx)
-//TODO: check
-#define BlueGigaGetch() bluegiga_getch()
-// transmit previous date in buffer
-#define BlueGigaCheckAndParse(_dev,_trans) {    \
-    bluegiga_send();                              \
+// transmit previous date in buffer and parse data received
+#define BlueGigaCheckAndParse(_dev,_trans) {      \
     if (BlueGigaChAvailable())                    \
       bluegiga_read_buffer( &(_trans) );          \
+    bluegiga_send();                              \
   }
 
 #endif /* BLUEGIGA_DATA_LINK_H */
-
