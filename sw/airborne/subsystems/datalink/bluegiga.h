@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015  Kirk Scehper <kirkscheper@gmail.com>
+ * Copyright (C) 2015  Kirk Scheper <kirkscheper@gmail.com>
  *
  * This file is part of paparazzi.
  *
@@ -79,7 +79,7 @@ void bluegiga_scan(void);
 // FIXME it should not appear here, this will be fixed with the rx improvements some day...
 // BLUEGIGA needs a specific read_buffer function
 #include "subsystems/datalink/pprz_transport.h"
-
+#include "led.h"
 static inline void bluegiga_read_buffer(struct pprz_transport *t)
 {
   do {
@@ -91,6 +91,7 @@ static inline void bluegiga_read_buffer(struct pprz_transport *t)
     // reached end of circular read buffer or message received
     // if received, decode and advance
     if (t->trans_rx.msg_received) {
+      LED_TOGGLE(3);
       pprz_parse_payload(t);
       t->trans_rx.msg_received = FALSE;
     }

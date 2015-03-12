@@ -30,8 +30,6 @@
 #include "mcu_periph/spi.h"
 #include "mcu_periph/gpio.h"
 
-#include "led.h"
-
 #ifndef BLUEGIGA_SPI_DEV
 #define BLUEGIGA_SPI_DEV spi2
 #endif
@@ -165,14 +163,6 @@ void bluegiga_send()
       bluegiga_p.work_tx[i] = 0;
     }
 
-    // Test data integrity
-    //for (i = 0; i < bluegiga_spi.output_length; i++) {
-    //  bluegiga_p.work_tx[i] = i+1;
-    //}
-
-    // Now send off spi transaction!
-    // trigger interrupt on BlueGiga to listen on spi
-    //gpio_clear(BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);
     coms_status = BLUEGIGA_SENDING;
   }
 }
@@ -181,9 +171,8 @@ void bluegiga_send()
 void bluegiga_receive(void)
 {
   if (bluegiga_spi.status == SPITransSuccess) {
-    if(coms_status == BLUEGIGA_SENDING){
+    if (coms_status == BLUEGIGA_SENDING) {
       // Handle successful sent message
-      //gpio_set(BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);     // Reset interrupt pin
       for (uint8_t i = 0; i < bluegiga_spi.output_length; i++) { // Clear tx buffer
         bluegiga_p.work_tx[i] = 0;
       }
@@ -194,53 +183,50 @@ void bluegiga_receive(void)
     if (packet_len > bluegiga_spi.input_length) {
       // Direct message from Bluegiga
       int k_rssi, i;
-      switch( packet_len )
-      {
-      case 0xff:
-        // Connection lost with ground station!
-        // Stop datalink
-        bluegiga_p.rx_insert_idx    = 0;
-        bluegiga_p.rx_extract_idx   = 0;
-        bluegiga_p.tx_insert_idx    = 0;
-        bluegiga_p.tx_extract_idx   = 0;
+      switch (packet_len) {
+        case 0xff:        // Connection lost with ground station!
+          // Stop datalink
+          bluegiga_p.rx_insert_idx    = 0;
+          bluegiga_p.rx_extract_idx   = 0;
+          bluegiga_p.tx_insert_idx    = 0;
+          bluegiga_p.tx_extract_idx   = 0;
 
-        LED_OFF(3);
-        coms_status = BLUEGIGA_UNINIT;
-        gpio_set(BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);     // Reset interrupt pin
-        break;
-      case 0xfe:
-        // rssi data
-          k_rssi = bluegiga_p.work_rx[2];
-          for (i = 0; i < k_rssi; i++) // read rssi somewhere
-            bluegiga_rssi[i] = bluegiga_p.work_rx[3+i];
-          break;
-      case 0xfd:
-        // interrupt handled on bluegiga
-        gpio_set(BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);     // Reset interrupt pin
-
-        // fetch scan status
-        if (bluegiga_p.work_rx[2] == 1)
-          coms_status = BLUEGIGA_SCANNING;
-        else
+          LED_OFF(3);
           coms_status = BLUEGIGA_UNINIT;
-        break;
-      default:
-        break;
+          gpio_set(BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);     // Reset interrupt pin
+          break;
+        case 0xfe:        // rssi data
+          k_rssi = bluegiga_p.work_rx[2];
+          for (i = 0; i < k_rssi; i++) {
+            bluegiga_rssi[i] = bluegiga_p.work_rx[3 + i];
+          }
+          break;
+        case 0xfd:        // interrupt handled on bluegiga
+          gpio_set(BLUEGIGA_DRDY_GPIO, BLUEGIGA_DRDY_GPIO_PIN);     // Reset interrupt pin
+
+          // fetch scan status
+          if (bluegiga_p.work_rx[2] == 1) {
+            coms_status = BLUEGIGA_SCANNING;
+          } else {
+            coms_status = BLUEGIGA_UNINIT;
+          }
+          break;
+        default:
+          break;
       }
     }
 
     // handle incoming datalink message
-    else if(packet_len > 0){
+    else if (packet_len > 0) {
       // Handle received message
       for (uint8_t i = 0; i < packet_len; i++) {
         bluegiga_p.rx_buf[(bluegiga_p.rx_insert_idx + i) % BLUEGIGA_BUFFER_SIZE] = bluegiga_p.work_rx[i + 2];
       }
       bluegiga_increment_buf(&bluegiga_p.rx_insert_idx, packet_len);
       coms_status = BLUEGIGA_IDLE;
-      LED_TOGGLE(3);
-    }
-    else
+    } else {
       coms_status = BLUEGIGA_IDLE;
+    }
 
     // clear rx buffer
     for (uint8_t i = 0; i < bluegiga_spi.input_length; i++) {
