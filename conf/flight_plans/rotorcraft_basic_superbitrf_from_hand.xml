@@ -2,7 +2,7 @@
 <!--
 The goal of this flightplan is to have a safe, simple no-brainer flightplan for a ladylisa.
 -->
-<flight_plan alt="5" ground_alt="0" lat0="51.991231" lon0="4.378035" max_dist_from_home="60" name="Fromhand" security_height="10">
+<flight_plan alt="5" ground_alt="0" lat0="51.991231" lon0="4.378035" max_dist_from_home="60" name="Fromhand" security_height="20">
   <header>
 
 #include "autopilot.h"
@@ -56,7 +56,7 @@ The goal of this flightplan is to have a safe, simple no-brainer flightplan for 
   <blocks>
     <block name="Init">
       <call fun="NavKillThrottle()"/>
-      <while cond="!GpsFixValid() || gps.pacc > 400 || !(ahrs.status == AHRS_RUNNING)"/>
+      <while cond="!GpsFixValid() || gps.pacc > 450 || !(ahrs.status == AHRS_RUNNING)"/>
     </block>
     <block name="Geo init">
       <while cond="LessThan(NavBlockTime(), 8)"/>
