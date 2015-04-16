@@ -2,7 +2,7 @@
 <!--
 The goal of this flightplan is to have a safe, simple no-brainer flightplan for a ladylisa.
 -->
-<flight_plan alt="5" ground_alt="0" lat0="51.991231" lon0="4.378035" max_dist_from_home="60" name="Fromhand" security_height="2">
+<flight_plan alt="6" ground_alt="1" lat0="51.991231" lon0="4.378035" max_dist_from_home="200" name="Fromhand" security_height="2">
   <header>
 
 #include "autopilot.h"
@@ -30,7 +30,7 @@ The goal of this flightplan is to have a safe, simple no-brainer flightplan for 
     <waypoint name="CAM" x="-5" y="-5" height="2.0"/>
     <waypoint name="TD" x="0.0" y="0.0"/>
   </waypoints>
-  <sectors>
+<!--  <sectors>
     <sector color="red" name="Flight_Area">
       <corner name="FLY1"/>
       <corner name="FLY2"/>
@@ -43,29 +43,29 @@ The goal of this flightplan is to have a safe, simple no-brainer flightplan for 
       <corner name="KILL3"/>
       <corner name="KILL4"/>
     </sector>
-  </sectors>
+  </sectors>-->
   <exceptions>
     <!-- Check inside small flight area, then goto Center(Standby) -->
-    <exception cond="Or(! InsideFlight_Area(GetPosX(), GetPosY()), GetPosAlt() > GetAltRef() + 50) && !(nav_block == IndexOfBlock('Init')) && !(nav_block == IndexOfBlock('Geo init')) && !(nav_block == IndexOfBlock('landed'))" deroute="Standby"/>
+    <!--     <exception cond="Or(! InsideFlight_Area(GetPosX(), GetPosY()), GetPosAlt() > GetAltRef() + 50) && !(nav_block == IndexOfBlock('Init')) && !(nav_block == IndexOfBlock('Geo init')) && !(nav_block == IndexOfBlock('landed'))" deroute="Standby"/>-->
     <!-- Check if battery is empty, then Land Here -->
-    <exception cond="electrical.bat_low && !(nav_block == IndexOfBlock('land')) && !(nav_block == IndexOfBlock('flare')) && !(nav_block == IndexOfBlock('landed'))" deroute="land"/>
-    <exception cond="electrical.bat_critical && !(nav_block == IndexOfBlock('land')) && !(nav_block == IndexOfBlock('flare')) && !(nav_block == IndexOfBlock('landed'))" deroute="land here"/>
+    <!--     <exception cond="electrical.bat_low && !(nav_block == IndexOfBlock('land')) && !(nav_block == IndexOfBlock('flare')) && !(nav_block == IndexOfBlock('landed'))" deroute="land"/>
+    <exception cond="electrical.bat_critical && !(nav_block == IndexOfBlock('land')) && !(nav_block == IndexOfBlock('flare')) && !(nav_block == IndexOfBlock('landed'))" deroute="land here"/>-->
     <!-- Check if time is up(10 seconds range), then Land Here 
     <exception cond="10 > time_until_land && !(nav_block == IndexOfBlock('land')) && !(nav_block == IndexOfBlock('flare')) && !(nav_block == IndexOfBlock('landed'))" deroute="land here"/>-->
   </exceptions>
   <blocks>
     <block name="Init">
       <call fun="NavKillThrottle()"/>
-      <while cond="!GpsFixValid() || gps.pacc > 400 || !(ahrs.status == AHRS_RUNNING)"/>
+      <while cond="!GpsFixValid() || gps.pacc > 500 || !(ahrs.status == AHRS_RUNNING)"/>
     </block>
     <block name="Geo init">
-      <while cond="LessThan(NavBlockTime(), 8)"/>
+      <while cond="LessThan(NavBlockTime(), 10)"/>
       <call fun="NavSetGroundReferenceHere()"/>
-      <call fun="NavSetAltitudeReferenceHere()"/>
+  <!--    <call fun="NavSetAltitudeReferenceHere()"/>
       <call fun="NavSetWaypointHere(WP_HOME)"/>
       <call fun="NavSetWaypointHere(WP_CLIMB)"/>
       <call fun="NavSetWaypointHere(WP_STDBY)"/>
-      <call fun="NavSetWaypointHere(WP_TD)"/>
+      <call fun="NavSetWaypointHere(WP_TD)"/>-->
     </block>
     <block name="Start Engine">
       <call fun="NavResurrect()"/>
@@ -75,17 +75,17 @@ The goal of this flightplan is to have a safe, simple no-brainer flightplan for 
       <call fun="NavSetAltitudeReferenceHere()"/>
       <call fun="NavSetWaypointHere(WP_STDBY)"/>
       <call fun="NavSetWaypointHere(WP_CLIMB)"/>
-      <exception cond="stateGetPositionEnu_f()->z > 5.0" deroute="Standby"/>
+      <exception cond="stateGetPositionEnu_f()->z > 2.0" deroute="Standby"/>
       <set value="0" var="autopilot_flight_time"/>    
-      <!-- If take-off to first point takes to long to reach somehow because of some reason, abort flight -->
-     <exception cond="block_time > 30" deroute="land"/>
+      <!-- If take-off to first point takes to long to reach somehow because of some reason, abort flight 
+     <exception cond="block_time > 30" deroute="land"/>-->
      <!-- To make sure that takoff is straight up -->
-    <attitude pitch="0" roll="0" throttle="0.90" until="stage_time > 1" vmode="throttle"/>
+    <attitude pitch="0" roll="0" throttle="0.90" until="stage_time > 0.5" vmode="throttle"/>
 <!--Alternative <exception cond="WaypointAlt(WP_A) > stateGetPositionEnu_f()->z" deroute="A_to_B_and_back"/>-->
-     <stay vmode="climb" climb="0.9" until="WaypointAlt(WP_STDBY) > stateGetPositionEnu_f()->z" wp="CLIMB"/>
+     <stay vmode="climb" climb="0.9" wp="CLIMB"/>
      </block>
-    <block name="Standby" strip_button="Standby" strip_icon="home.png" pre_call="if(!InsideKill(GetPosX(), GetPosY())) NavKillThrottle()">
-      <exception cond="block_time > 60" deroute="land"/>
+    <block name="Standby" strip_button="Standby" strip_icon="home.png" > <!--pre_call="if(!InsideKill(GetPosX(), GetPosY())) NavKillThrottle()">-->
+      <exception cond="block_time > 30" deroute="land"/>
       <go wp="STDBY"/>
       <stay wp="STDBY"/>
     </block>
