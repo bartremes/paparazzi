@@ -24,7 +24,7 @@
   <aircraft
    name="bebop"
    ac_id="202"
-   airframe="airframes/TUDelft/bebop4.xml"
+   airframe="airframes/BR/bebop3.xml"
    radio="radios/cockpitSX.xml"
    telemetry="telemetry/default_rotorcraft.xml"
    flight_plan="flight_plans/rotorcraft_basic.xml"
