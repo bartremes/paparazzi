@@ -58,9 +58,9 @@ void ble_rsp_system_hello(const void *nul)
 {
 }
 
-void ble_rsp_system_address_get(const struct ble_msg_system_address_get_rsp_t *msg)
-{
-}
+//void ble_rsp_system_address_get(const struct ble_msg_system_address_get_rsp_t *msg)
+//{
+//}
 
 void ble_rsp_system_reg_write(const struct ble_msg_system_reg_write_rsp_t *msg)
 {
@@ -170,9 +170,9 @@ void ble_rsp_connection_get_rssi(const struct ble_msg_connection_get_rssi_rsp_t 
 {
 }
 
-void ble_rsp_connection_update(const struct ble_msg_connection_update_rsp_t *msg)
-{
-}
+//void ble_rsp_connection_update(const struct ble_msg_connection_update_rsp_t *msg)
+//{
+//}
 
 void ble_rsp_connection_version_update(const struct ble_msg_connection_version_update_rsp_t *msg)
 {
@@ -215,10 +215,6 @@ void ble_rsp_attclient_find_information(const struct ble_msg_attclient_find_info
 }
 
 void ble_rsp_attclient_read_by_handle(const struct ble_msg_attclient_read_by_handle_rsp_t *msg)
-{
-}
-
-void ble_rsp_attclient_attribute_write(const struct ble_msg_attclient_attribute_write_rsp_t *msg)
 {
 }
 
@@ -527,6 +523,9 @@ void ble_evt_hardware_analog_comparator_status(const struct ble_msg_hardware_ana
 {
 }
 
+void ble_rsp_attclient_attribute_write(const struct ble_msg_attclient_attribute_write_rsp_t *msg)
+{	
+}
 
 /**Reset system**/
 void ble_rsp_dfu_reset(const void *nul)
