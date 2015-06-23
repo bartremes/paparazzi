@@ -1,6 +1,16 @@
 <!-- this is a LadyBird quadrotor frame equiped with Lisa/S 1.0 -->
 <!-- The LadyBird frame comes with four brushed motors in an X configuration. -->
+<!--to start teh bluethoot dongel:
+cd/sw/ext/bluegiga_usb_dongle
+./drone-telemetry-demo /dev/ttyACM0 scan 
+./drone-telemetry-demo /dev/ttyACM0 00:07:80:2d:e0:4b 4242 4252
+or
+./drone-telemetry-demo /dev/ttyACM0 all 4242 4252
 
+to close it:
+system monitor
+
+-->
 <!--
      The motor and rotor configuration is the following:
 
