@@ -95,12 +95,13 @@ system monitor
 <define name="MAG_Z_SENS" value="4.15618897164" integer="16"/> -->
 
     <!-- MAGNETO CALIBRATION DELFT-->
-<define name="MAG_X_NEUTRAL" value="10"/>
-<define name="MAG_Y_NEUTRAL" value="238"/>
-<define name="MAG_Z_NEUTRAL" value="-74"/>
-<define name="MAG_X_SENS" value="3.67001348283" integer="16"/>
-<define name="MAG_Y_SENS" value="3.98840260231" integer="16"/>
-<define name="MAG_Z_SENS" value="4.32568461736" integer="16"/>
+<define name="MAG_X_NEUTRAL" value="-449"/>
+<define name="MAG_Y_NEUTRAL" value="-323"/>
+<define name="MAG_Z_NEUTRAL" value="211"/>
+<define name="MAG_X_SENS" value="4.19654311175" integer="16"/>
+<define name="MAG_Y_SENS" value="4.5525262549" integer="16"/>
+<define name="MAG_Z_SENS" value="5.02786709025" integer="16"/>
+
 
 
 
