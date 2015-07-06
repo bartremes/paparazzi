@@ -320,6 +320,9 @@ void mavlink_init(void)
 	rem_addr.sin_addr.s_addr = inet_addr(MAVLINK_IP_ADDRESS_STR); 
   // rem_addr.sin_addr.s_addr = inet_addr("192.168.42.3"); 
 	rem_addr.sin_port = htons(MAVLINK_UDP_PORT);
+
+  // Send the current block
+  mavlink_block_cb(mission_mgr.current_block);
 }
 
 /**
