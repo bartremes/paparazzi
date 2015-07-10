@@ -39,6 +39,7 @@
 
 #include "std.h"
 #include <string.h>
+#include <stdio.h>
 
 /**
  * This general state interface holds all the most important vehicle states like

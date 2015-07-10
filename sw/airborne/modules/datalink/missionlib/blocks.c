@@ -33,6 +33,8 @@
 #include "modules/datalink/mavlink.h"
 #include "modules/datalink/missionlib/mission_manager.h"
 
+#include "subsystems/navigation/common_flight_plan.h"
+
 static void mavlink_send_block_count(void)
 {
     mavlink_message_t msg;
@@ -63,13 +65,13 @@ static void mavlink_send_block(uint16_t seq)
 
         mavlink_msg_block_item_encode(mavlink_system.sysid, mavlink_system.compid, &msg, &block_item);
 
-#ifdef MAVLINK_FLAG_DEBUG
+#ifdef MAVLINK_FLAG_DEBUG_EVENT
         printf("Sent BLOCK_ITEM message\n");
 #endif
         mavlink_send_message(&msg);
     }
     else {
-#ifdef MAVLINK_FLAG_DEBUG
+#ifdef MAVLINK_FLAG_DEBUG_EVENT
         perror("Block index out of bounds\n");
 #else
         // TODO: Fix for stm32 etc.
@@ -94,7 +96,7 @@ void mavlink_block_message_handler(const mavlink_message_t* msg)
     { 
     	case MAVLINK_MSG_ID_BLOCK_REQUEST_LIST:
         {
-#ifdef MAVLINK_FLAG_DEBUG
+#ifdef MAVLINK_FLAG_DEBUG_EVENT
             printf("Received BLOCK_REQUEST_LIST message\n");
 #endif
             mavlink_block_request_list_t block_request_list_msg;
@@ -122,7 +124,7 @@ void mavlink_block_message_handler(const mavlink_message_t* msg)
 
         case MAVLINK_MSG_ID_BLOCK_REQUEST:
         {
-#ifdef MAVLINK_FLAG_DEBUG
+#ifdef MAVLINK_FLAG_DEBUG_EVENT
             printf("Received BLOCK_REQUEST message\n");
 #endif
         	mavlink_block_request_t block_request_msg;
@@ -151,7 +153,7 @@ void mavlink_block_message_handler(const mavlink_message_t* msg)
 
         case MAVLINK_MSG_ID_BLOCK_ITEM:
         {
-#ifdef MAVLINK_FLAG_DEBUG
+#ifdef MAVLINK_FLAG_DEBUG_EVENT
             printf("Received BLOCK_ITEM message\n");
 #endif
             mavlink_block_item_t block_item_msg;

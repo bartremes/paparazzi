@@ -32,7 +32,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "subsystems/navigation/waypoints.h"
+// #include "subsystems/navigation/waypoints.h"
+#include "subsystems/navigation/common_nav.h"
 
 #include "modules/datalink/mavlink.h"
 #include "modules/datalink/missionlib/mission_manager.h"
@@ -64,13 +65,13 @@ static void mavlink_send_wp(uint16_t seq)
 
         mavlink_msg_mission_item_encode(mavlink_system.sysid, mavlink_system.compid, &msg, mission_item);
 
-#ifdef MAVLINK_FLAG_DEBUG
+#ifdef MAVLINK_FLAG_DEBUG_EVENT
         printf("Sent MISSION_ITEM message\n");
 #endif
         mavlink_send_message(&msg);
     }
     else {
-#ifdef MAVLINK_FLAG_DEBUG
+#ifdef MAVLINK_FLAG_DEBUG_EVENT
         perror("Wp index out of bounds\n");
 #else
         // TODO: Fix for stm32 etc.
@@ -84,14 +85,26 @@ void mavlink_wp_init(void)
     if (NB_WAYPOINT > 0) {
         for (uint8_t i = 0; i < NB_WAYPOINT; i++) {
             mavlink_mission_item_t mission_item;
-            mission_item.x = waypoints[i].lla.lat; // lattitude
-            mission_item.y = waypoints[i].lla.lon; // longtitude
-            mission_item.z = waypoints[i].lla.alt; // altitude
+
+            // Convert ENU waypoint to UTM (may be removed, but nav_move_waypoint() uses UTM coordinates)
+            struct UtmCoor_f utm;
+            utm.east = waypoints[i].x + nav_utm_east0;
+            utm.north = waypoints[i].y + nav_utm_north0;
+            utm.alt = waypoints[i].a;
+            utm.zone = nav_utm_zone0;
+
+            // Convert UTM waypoint to LLA
+            struct LlaCoor_f lla;
+            lla_of_utm_f(&lla, &utm);
+            mission_item.x = lla.lat; // lattitude
+            mission_item.y = lla.lon; // longtitude
+            mission_item.z = lla.alt; // altitude
             mission_item.seq = i;
+
             mission_mgr.waypoints[i] = mission_item;
         }
     } else {
-#ifdef MAVLINK_FLAG_DEBUG
+#ifdef MAVLINK_FLAG_DEBUG_EVENT
         perror("The waypoint array is empty\n");
 #else
         // TODO: Fix for stm32 etc.
@@ -105,7 +118,7 @@ void mavlink_wp_message_handler(const mavlink_message_t* msg)
     { 
     	case MAVLINK_MSG_ID_MISSION_REQUEST_LIST:
         {
-#ifdef MAVLINK_FLAG_DEBUG
+#ifdef MAVLINK_FLAG_DEBUG_EVENT
             printf("Received MISSION_REQUEST_LIST message\n");
 #endif
             mavlink_mission_request_list_t mission_request_list_msg;
@@ -133,7 +146,7 @@ void mavlink_wp_message_handler(const mavlink_message_t* msg)
 
         case MAVLINK_MSG_ID_MISSION_REQUEST:
         {
-#ifdef MAVLINK_FLAG_DEBUG
+#ifdef MAVLINK_FLAG_DEBUG_EVENT
             printf("Received MISSION_REQUEST message\n");
 #endif
         	mavlink_mission_request_t mission_request_msg;
@@ -162,18 +175,27 @@ void mavlink_wp_message_handler(const mavlink_message_t* msg)
 
         case MAVLINK_MSG_ID_MISSION_ITEM:
         {
-#ifdef MAVLINK_FLAG_DEBUG
-            printf("Received BLOCK_ITEM message\n");
+#ifdef MAVLINK_FLAG_DEBUG_EVENT
+            printf("Received MISSION_ITEM message\n");
 #endif
             mavlink_mission_item_t mission_item_msg;
             mavlink_msg_mission_item_decode(msg, &mission_item_msg); // Cast the incoming message to a mission_item_msg
+            
             if(mission_item_msg.target_system == mavlink_system.sysid) {              
                 if (mission_mgr.state == STATE_IDLE) { // Only handle incoming mission item messages if there a not currently being sent
-                    struct LlaCoor_i lla;
-                    lla.lat = mission_item_msg.x; // lattitude
-                    lla.lon = mission_item_msg.y; // longitude
-                    lla.alt = mission_item_msg.z; // altitude
-                    nav_set_waypoint_latlon(mission_item_msg.seq, &lla); // move the waypoint with the id equal to seq 
+                    struct LlaCoor_f lla;
+                    lla.lat = mission_item_msg.x; // lattitude in rad
+                    lla.lon = mission_item_msg.y; // longitude in rad
+                    lla.alt = mission_item_msg.z; // altitude in meters
+
+                    struct UtmCoor_f utm;
+                    utm.zone = nav_utm_zone0;
+                    utm_of_lla_f(&utm, &lla);
+
+                    printf("Received WP(%d): %f, %f, %f\n",mission_item_msg.seq, utm.east, utm.north, utm.alt);
+
+                    // nav_set_waypoint_latlon(mission_item_msg.seq, &lla); // move the waypoint with the id equal to seq 
+                    nav_move_waypoint(mission_item_msg.seq, utm.east, utm.north, utm.alt);
                 }
             }
         }

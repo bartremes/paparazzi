@@ -31,6 +31,8 @@
  * @author Felix Ruess <felix.ruess@gmail.com>
  */
 
+#include <stdio.h>
+
 #include "state.h"
 
 struct State state;

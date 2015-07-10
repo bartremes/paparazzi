@@ -31,7 +31,7 @@
 
 #include <stdio.h>
 
-#include "firmwares/rotorcraft/navigation.h"
+// #include "firmwares/rotorcraft/navigation.h"
 #include "mcu_periph/sys_time.h"
 
 #include "generated/flight_plan.h"

@@ -238,6 +238,8 @@ static void mavlink_send_gps_position(void)
   
   int32_t relative_alt = stateGetPositionLla_i()->alt - state.ned_origin_f.hmsl;
 
+  // TODO: Probable issue given the stateGetPositionLla_i function
+
   mavlink_message_t msg;
   mavlink_msg_global_position_int_pack(mavlink_system.sysid, // system id
  								   	                   mavlink_system.compid, // component id
@@ -342,6 +344,7 @@ void mavlink_periodic(void)
   if (mission_mgr.current_block != nav_block) {
     mission_mgr.current_block = nav_block;
     mavlink_block_cb(mission_mgr.current_block);
+    printf("Update current block\n");
   }
 }
 
