@@ -128,12 +128,13 @@ struct sirf_msg_41 {
  * This part is used by the autopilot to read data from a uart
  */
 #include "mcu_periph/link_device.h"
+#include "mcu_periph/uart.h"
 
 extern void sirf_parse_char(uint8_t c);
 extern void sirf_parse_msg(void);
-extern void gps_sirf_msg(void (* _cb)(void));
+extern void gps_sirf_msg(void);
 
-static inline void GpsEvent(void (* _sol_available_callback)(void))
+static inline void GpsEvent(void)
 {
   struct link_device *dev = &((GPS_LINK).device);
 
@@ -143,7 +144,7 @@ static inline void GpsEvent(void (* _sol_available_callback)(void))
     }
   }
   if (gps_sirf.msg_available) {
-    gps_sirf_msg(_sol_available_callback);
+    gps_sirf_msg();
   }
 }
 

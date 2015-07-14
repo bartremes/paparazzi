@@ -213,7 +213,7 @@ let supervision = fun ?file gui log (ac_combo : Gtk_tools.combo) (target_combo :
   in
 
   (* Sessions *)
-  let session_combo = Gtk_tools.combo [] gui#vbox_session in
+  let session_combo = Gtk_tools.combo ~width:50 [] gui#vbox_session in
 
   let remove_custom_sessions = fun () ->
     let (store, _column) = Gtk_tools.combo_model session_combo in
@@ -243,7 +243,10 @@ let supervision = fun ?file gui log (ac_combo : Gtk_tools.combo) (target_combo :
 	List.iter
 	  (fun arg ->
 	    let constant =
-	      try double_quote (Xml.attrib arg "constant") with _ -> "" in
+          match try double_quote (Xml.attrib arg "constant") with _ -> "" with
+            "@AIRCRAFT" -> (Gtk_tools.combo_value ac_combo)
+          | "@AC_ID" -> gui#entry_ac_id#text
+          | const -> const in
 	    p := sprintf "%s %s %s" !p (ExtXml.attrib arg "flag") constant)
 	  (Xml.children program);
 	run_and_monitor ?file gui log name !p)

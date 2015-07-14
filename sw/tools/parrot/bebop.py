@@ -22,13 +22,8 @@
 from __future__ import print_function
 import re
 import argparse
-import socket
-import telnetlib
 import os
-import sys
 from time import sleep
-from ftplib import FTP
-import ftplib
 
 import parrot_utils
 
@@ -36,7 +31,7 @@ import parrot_utils
 # Read from config.ini TODO
 def read_from_config(name, config=''):
     if config == '':
-        config = execute_command('cat /data/config.ini')
+        config = parrot_utils.execute_command('cat /data/config.ini')
     search = re.search(name + '[^=]+=[\r\n\t ]([^\r\n\t ]+)', config)
     if search is None:
         return ''
@@ -46,9 +41,9 @@ def read_from_config(name, config=''):
 # Write to config TODO
 def write_to_config(name, value):
     if read_from_config(name) == '':
-        execute_command('echo "' + name + ' = ' + value + '\" >> /data/config.ini')
+        parrot_utils.execute_command('echo "' + name + ' = ' + value + '\" >> /data/config.ini')
     else:
-        execute_command('sed -i "s/\(' + name + ' *= *\).*/\\1' + value + '/g" /data/config.ini')
+        parrot_utils.execute_command('sed -i "s/\(' + name + ' *= *\).*/\\1' + value + '/g" /data/config.ini')
 
 
 def bebop_status():
@@ -72,7 +67,7 @@ subparsers.add_parser('status', help='Request the status of the Bebop')
 subparsers.add_parser('reboot', help='Reboot the Bebop')
 subparser_upload_and_run = subparsers.add_parser('upload_file_and_run', help='Upload and run software (for instance the Paparazzi autopilot)')
 subparser_upload_and_run.add_argument('file', help='Filename of an executable')
-subparser_upload_and_run.add_argument('folder', help='Destination subfolder (raw or sdk for Paparazzi autopilot)')
+subparser_upload_and_run.add_argument('folder', help='Destination subfolder (raw for Paparazzi autopilot)')
 subparser_upload = subparsers.add_parser('upload_file', help='Upload a file to the Bebop')
 subparser_upload.add_argument('file', help='Filename')
 subparser_upload.add_argument('folder', help='Destination subfolder (base destination folder is /data/ftp)')
