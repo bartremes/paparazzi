@@ -53,7 +53,7 @@ mavlink_mission_mgr mission_mgr;
  */
 static void mavlink_send_heartbeat(void) 
 {
-#ifdef MAVLINK_FLAG_DEBUG
+#ifdef MAVLINK_FLAG_DEBUG_PERIODIC
   printf("Send heartbeat message\n");
 #endif 
   /* 
@@ -84,7 +84,7 @@ static void mavlink_send_heartbeat(void)
  */
 static void mavlink_send_attitude(void)
 {
-#ifdef MAVLINK_FLAG_DEBUG
+#ifdef MAVLINK_FLAG_DEBUG_PERIODIC
   printf("Send attitude message\n");
 #endif 	
   /*
@@ -116,7 +116,7 @@ static void mavlink_send_attitude(void)
  */
 static void mavlink_send_altitude_ground_speed(void)
 {
-#ifdef MAVLINK_FLAG_DEBUG
+#ifdef MAVLINK_FLAG_DEBUG_PERIODIC
   printf("Send altitude and ground speed message\n");
 #endif 	
   /*
@@ -146,7 +146,7 @@ static void mavlink_send_altitude_ground_speed(void)
  */
 static void mavlink_send_battery_status(void)
 {
-#ifdef MAVLINK_FLAG_DEBUG
+#ifdef MAVLINK_FLAG_DEBUG_PERIODIC
   printf("Send battery status message\n");
 #endif 	
   /*
@@ -184,7 +184,7 @@ static void mavlink_send_battery_status(void)
  */
 static void mavlink_send_gps_status(void)
 {
-#ifdef MAVLINK_FLAG_DEBUG
+#ifdef MAVLINK_FLAG_DEBUG_PERIODIC
   printf("Send GPS status message\n");
 #endif 	
   /*
@@ -215,7 +215,7 @@ static void mavlink_send_gps_status(void)
  */
 static void mavlink_send_gps_position(void)
 {
-#ifdef MAVLINK_FLAG_DEBUG
+#ifdef MAVLINK_FLAG_DEBUG_PERIODIC
   printf("Send GPS position message\n");
 #endif 	
   /*
@@ -344,7 +344,6 @@ void mavlink_periodic(void)
   if (mission_mgr.current_block != nav_block) {
     mission_mgr.current_block = nav_block;
     mavlink_block_cb(mission_mgr.current_block);
-    printf("Update current block\n");
   }
 }
 

@@ -48,7 +48,7 @@ static void mavlink_send_wp_count(void)
 	
     mavlink_msg_mission_count_encode(mavlink_system.sysid, mavlink_system.compid, &msg, &wp_count); // encode the block count message
 
-#ifdef MAVLINK_FLAG_DEBUG
+#ifdef MAVLINK_FLAG_DEBUG_EVENT
         printf("Sent WP_COUNT message\n");
 #endif
     mavlink_send_message(&msg);
@@ -127,6 +127,9 @@ void mavlink_wp_message_handler(const mavlink_message_t* msg)
                 if (mission_mgr.state == STATE_IDLE) {
                     if (NB_WAYPOINT > 0) {
                         mission_mgr.state = STATE_SEND_LIST;
+#ifdef MAVLINK_FLAG_DEBUG_EVENT
+      printf("State: %d\n", mission_mgr.state);
+#endif
                         mission_mgr.seq = 0;
                         mission_mgr.rem_sysid = msg->sysid;
                         mission_mgr.rem_compid = msg->compid;
@@ -158,6 +161,9 @@ void mavlink_wp_message_handler(const mavlink_message_t* msg)
         			sys_time_cancel_timer(mission_mgr.timer_id); // Cancel the timeout timer
         			
         			mission_mgr.state = STATE_SEND_ITEM;
+#ifdef MAVLINK_FLAG_DEBUG_EVENT
+      printf("State: %d\n", mission_mgr.state);
+#endif
         			mission_mgr.seq = mission_request_msg.seq;
 
         			mavlink_send_wp(mission_mgr.seq);

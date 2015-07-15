@@ -45,7 +45,7 @@ static void mavlink_send_block_count(void)
 	
     mavlink_msg_block_count_encode(mavlink_system.sysid, mavlink_system.compid, &msg, &block_count); // encode the block count message
 
-#ifdef MAVLINK_FLAG_DEBUG
+#ifdef MAVLINK_FLAG_DEBUG_EVENT
         printf("Sent BLOCK_COUNT message\n");
 #endif
     mavlink_send_message(&msg);
@@ -105,6 +105,9 @@ void mavlink_block_message_handler(const mavlink_message_t* msg)
                 if (mission_mgr.state == STATE_IDLE) {
                     if (NB_BLOCK > 0) {
                         mission_mgr.state = STATE_SEND_LIST;
+#ifdef MAVLINK_FLAG_DEBUG_EVENT
+      printf("State: %d\n", mission_mgr.state);
+#endif
                         mission_mgr.seq = 0;
                         mission_mgr.rem_sysid = msg->sysid;
                         mission_mgr.rem_compid = msg->compid;
@@ -136,6 +139,9 @@ void mavlink_block_message_handler(const mavlink_message_t* msg)
         			sys_time_cancel_timer(mission_mgr.timer_id); // Cancel the timeout timer
         			
         			mission_mgr.state = STATE_SEND_ITEM;
+#ifdef MAVLINK_FLAG_DEBUG_EVENT
+      printf("State: %d\n", mission_mgr.state);
+#endif
         			mission_mgr.seq = block_request_msg.seq;
 
         			mavlink_send_block(mission_mgr.seq);
