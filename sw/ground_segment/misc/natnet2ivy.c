@@ -504,17 +504,19 @@ gboolean timeout_transmit_callback(gpointer data) {
        * a single integer. The z axis is considered unsigned and only the latter 10 LSBs are
        * used.
        */
-      uint32_t pos_xyz = (((uint32_t)(pos.x*100.0)) & 0x3FF) << 22; // bits 31-22 x position in cm
-      pos_xyz |= (((uint32_t)(pos.y*100.0)) & 0x3FF) << 12; // bits 21-12 y position in cm
-      pos_xyz |= (((uint32_t)(pos.z*100.0)) & 0x3FF) << 2; // bits 11-2 z position in cm
+      uint32_t pos_xyz = (((uint32_t)(pos.x*100.0)) & 0x3FF) << 22; // bits 31-22 x ENU position in cm
+      pos_xyz |= (((uint32_t)(pos.y*100.0)) & 0x3FF) << 12; // bits 21-12 y ENU position in cm 
+      pos_xyz |= (((uint32_t)(pos.z*100.0)) & 0x3FF) << 2; // bits 11-2 ENU z position in cm
       // bits 1 and 0 are free
 
-      printf("%2.4f, %2.4f, %2.4f\n", pos.x, pos.y, pos.z);
+      // printf("East: %2.4fm, North: %2.4fm, Up: %2.4fm\n", pos.x, pos.y, pos.z);
 
       uint32_t speed_xy = (((uint32_t)(speed.x*100.0)) & 0x3FF) << 22; // bits 31-21 speed x in cm/s
       speed_xy |= (((uint32_t)(speed.y*100.0)) & 0x3FF) << 12; // bits 20-10 speed y in cm/s
       speed_xy |= (((uint32_t)(heading*100.0)) & 0x3FF) << 2; // bits 9-0 heading in rad*1e2 (The heading is already subsampled)
       // bits 1 and 0 are free
+
+      // printf("Speed x: %2.4fm/s, Speed y: %2.4f, Heading: %2.4fdeg\n", speed.x, speed.y, heading*180/M_PI);
 
       IvySendMsg("0 REMOTE_GPS_SMALL %d %d %d %d", aircrafts[rigidBodies[i].id].ac_id, // uint8 rigid body ID (1 byte)
         (uint8_t)rigidBodies[i].nMarkers, // status (1 byte)
@@ -719,6 +721,7 @@ static void parse_options(int argc, char** argv) {
     }
     // Set to use small packets
     else if(strcmp(argv[i], "-small") == 0) {
+      printf("Small GPS data packages are used!\n");
       small_packets = TRUE;
     }
 
@@ -749,10 +752,10 @@ int main(int argc, char** argv)
 {
   // Set the default tracking system position and angle
   struct EcefCoor_d tracking_ecef;
-  tracking_ecef.x = 3924304;
-  tracking_ecef.y = 300360;
-  tracking_ecef.z = 5002162;
-  tracking_offset_angle = 123.0 / 57.6;
+  tracking_ecef.x = 3924302;
+  tracking_ecef.y = 300366;
+  tracking_ecef.z = 5002164;
+  tracking_offset_angle = 1.95476876223364;
   ltp_def_from_ecef_d(&tracking_ltp, &tracking_ecef);
 
   // Parse the options from cmdline

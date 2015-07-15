@@ -2504,6 +2504,13 @@
    <field name="pan" type="int8"/>
  </message>
 
+  <message name="REMOTE_GPS_SMALL" id="153" link="forwarded">
+    <field name="ac_id"    type="uint8"/>
+    <field name="num_sv"   type="uint8"/>
+    <field name="pos_xyz"  type="int32" unit="cm"   alt_unit="m"/>
+    <field name="speed_xy" type="int32" unit="cm"   alt_unit="m"/>  
+  </message> 
+
 </msg_class>
 
 
