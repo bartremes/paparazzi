@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (C) 2014 Freek van Tienen <freek.v.tienen@gmail.com>
+ * Copyright (C) 2009-2013 The Paparazzi Team
  *
  * This file is part of paparazzi.
  *
@@ -22,25 +22,13 @@
  */
 
 /**
- * @file boards/bebop/electrical.c
- * Dummy electrical status readings for the bebop.
- * Because the voltage measurements is done trough the motor controllers.
+ * @file modules/sensors/bat_voltage_ardrone2.c
+ * Read the battery voltage on ARDrone2.
  */
+#ifndef BAT_VOLTAGE_ARDRONE2_H_
+#define BAT_VOLTAGE_ARDRONE2_H_
 
-#include "subsystems/electrical.h"
-#include "video.h"
-#include <stdlib.h>
+void bat_voltage_ardrone2_init(void);
+void bat_voltage_ardrone2_periodic(void);
 
-struct Electrical electrical;
-
-void electrical_init(void)
-{
-  // First we try to kill the dragon-prog and its respawner if it is running (done here because initializes first)
-  int ret __attribute__((unused)) = system("killall -q -9 watchdog.sh; killall -q -9 dragon-prog");
-
-  // We also try to initialize the video CMOS chips here (Bottom and front)
-  mt9v117_init();
-  //mt9f002_init();
-}
-
-void electrical_periodic(void) { }
+#endif /* BAT_VOLTAGE_ARDRONE2_H_ */

@@ -158,7 +158,7 @@ void stabilization_attitude_set_failsafe_setpoint(void)
 void stabilization_attitude_set_rpy_setpoint_i(struct Int32Eulers *rpy)
 {
   // stab_att_sp_euler.psi still used in ref..
-  memcpy(&stab_att_sp_euler, rpy, sizeof(struct Int32Eulers));
+  stab_att_sp_euler = *rpy;
 
   quat_from_rpy_cmd_i(&stab_att_sp_quat, &stab_att_sp_euler);
 }
@@ -220,7 +220,7 @@ static void attitude_run_indi(int32_t indi_commands[], struct Int32Quat *att_err
                                          STABILIZATION_INDI_FILT_OMEGA, STABILIZATION_INDI_FILT_ZETA, STABILIZATION_INDI_FILT_OMEGA_R);
 
   //Don't increment if thrust is off
-  if (!in_flight) {
+  if (stabilization_cmd[COMMAND_THRUST] < 300) {
     FLOAT_RATES_ZERO(indi.u);
     FLOAT_RATES_ZERO(indi.du);
     FLOAT_RATES_ZERO(indi.u_act_dyn);
