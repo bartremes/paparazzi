@@ -19,7 +19,7 @@
     <subsystem name="imu" type="bebop"/>
     <subsystem name="gps" type="furuno"/>
     <subsystem name="stabilization" type="int_quat"/>
-    <subsystem name="ahrs"          type="float_mlkf"/>
+    <subsystem name="ahrs" type="float_mlkf"/>
     <subsystem name="ins" type="extended"/>
   </firmware>
 
@@ -192,7 +192,7 @@
     <define name="MAX_BANK" value="20" unit="deg"/>
     <!-- Bad weather -->
     <!-- define name="MAX_BANK" value="32" unit="deg"/ -->
-    <define name="PGAIN" value="79"/>
+    <define name="PGAIN" value="15"/>
     <define name="DGAIN" value="100"/>
     <define name="IGAIN" value="30"/>
   </section>
