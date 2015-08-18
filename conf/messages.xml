@@ -261,10 +261,13 @@
   </message>
 
   <message name="WP_MOVED" id="35">
+    <description>
+      Waypoint with id wp_id has been updated/moved to the specified UTM coordinates.
+    </description>
     <field name="wp_id" type="uint8"/>
     <field name="utm_east" type="float" unit="m"/>
     <field name="utm_north" type="float" unit="m"/>
-    <field name="alt" type="float" unit="m"/>
+    <field name="alt" type="float" unit="m">Height above Mean Sea Level (geoid)</field>
     <field name="utm_zone" type="uint8"/>
   </message>
 
@@ -461,6 +464,7 @@
     <field name="lat"        type="int32"  unit="1e7deg" alt_unit="deg" alt_unit_coef="0.0000001"/>
     <field name="lon"        type="int32"  unit="1e7deg" alt_unit="deg" alt_unit_coef="0.0000001"/>
     <field name="alt"        type="int32"  unit="mm" alt_unit="m">altitude above WGS84 reference ellipsoid</field>
+    <field name="hmsl"       type="int32"  unit="mm" alt_unit="m">Height above Mean Sea Level (geoid)</field>
     <field name="course"     type="int16"  unit="decideg" alt_unit="deg"/>
     <field name="speed"      type="uint16" unit="cm/s" alt_unit="m/s"/>
     <field name="climb"      type="int16"  unit="cm/s" alt_unit="m/s"/>
@@ -1954,6 +1958,7 @@
     <field name="flow_der_y"  type="int16" unit="subpixels"/>
     <field name="vel_x"       type="float" unit="cm/s"/>
     <field name="vel_y"       type="float" unit="cm/s"/>
+    <field name="div_size"    type="float" unit="1/s"/>
     <field name="cmd_phi"     type="int32" alt_unit="deg" alt_unit_coef="0.0139882"/>
     <field name="cmd_theta"   type="int32" alt_unit="deg" alt_unit_coef="0.0139882"/>
   </message>
@@ -2773,7 +2778,7 @@
   <message name="LINK_REPORT" id="36">
     <description>Datalink status reported by Link for the Server</description>
     <field name="ac_id" type="string"/>
-    <field name="link_id" type="uint8"/>
+    <field name="link_id" type="string"/>
     <field name="run_time" type="uint32" unit="s"/>
     <field name="rx_lost_time" type="uint32" unit="s"/>
     <field name="rx_bytes" type="uint32"/>
