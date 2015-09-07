@@ -40,8 +40,12 @@
       <define name="VIEWVIDEO_DEVICE_BUFFERS" value="60"/>
       <define name="VIEWVIDEO_SHOT_PATH" value="/data/ftp/internal_000/images"/>
     </load>
-    <load name="nav_survey_rectangle_rotorcraft.xml" />
-    <load name="digital_cam_video.xml"/>
+    <load name="nav_survey_rectangle_rotorcraft.xml" >
+      <define name="RECTANGLE_SURVEY_DEFAULT_SWEEP" value="10"/>
+    </load>
+    <load name="digital_cam_video.xml">
+      <define name="DC_AUTOSHOOT_DISTANCE_INTERVAL" value="10"/>
+    </load>
     <load name="video_exif.xml"/>
   </modules>
 
