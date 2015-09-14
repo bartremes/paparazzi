@@ -48,7 +48,7 @@ static void mavlink_send_wp_count(void)
 	
     mavlink_msg_mission_count_encode(mavlink_system.sysid, mavlink_system.compid, &msg, &wp_count); // encode the block count message
 
-#ifdef MAVLINK_FLAG_DEBUG_EVENT
+#if MAVLINK_FLAG_DEBUG_EVENT
         printf("Sent WP_COUNT message\n");
 #endif
     mavlink_send_message(&msg);
@@ -65,13 +65,13 @@ static void mavlink_send_wp(uint16_t seq)
 
         mavlink_msg_mission_item_encode(mavlink_system.sysid, mavlink_system.compid, &msg, mission_item);
 
-#ifdef MAVLINK_FLAG_DEBUG_EVENT
+#if MAVLINK_FLAG_DEBUG_EVENT
         printf("Sent MISSION_ITEM message\n");
 #endif
         mavlink_send_message(&msg);
     }
     else {
-#ifdef MAVLINK_FLAG_DEBUG_EVENT
+#if MAVLINK_FLAG_DEBUG_EVENT
         perror("Wp index out of bounds\n");
 #else
         // TODO: Fix for stm32 etc.
@@ -86,7 +86,10 @@ void mavlink_wp_init(void)
         for (uint8_t i = 0; i < NB_WAYPOINT; i++) {
             mavlink_mission_item_t mission_item;
 
-            // Convert ENU waypoint to UTM (may be removed, but nav_move_waypoint() uses UTM coordinates)
+            /* 
+             * Convert ENU waypoint to UTM
+             * Imay be removed, but nav_move_waypoint() uses UTM coordinates in case of fixed-wing aircraft
+             */
             struct UtmCoor_f utm;
             utm.east = waypoints[i].x + nav_utm_east0;
             utm.north = waypoints[i].y + nav_utm_north0;
@@ -104,7 +107,7 @@ void mavlink_wp_init(void)
             mission_mgr.waypoints[i] = mission_item;
         }
     } else {
-#ifdef MAVLINK_FLAG_DEBUG_EVENT
+#if MAVLINK_FLAG_DEBUG_EVENT
         perror("The waypoint array is empty\n");
 #else
         // TODO: Fix for stm32 etc.
@@ -118,7 +121,7 @@ void mavlink_wp_message_handler(const mavlink_message_t* msg)
     { 
     	case MAVLINK_MSG_ID_MISSION_REQUEST_LIST:
         {
-#ifdef MAVLINK_FLAG_DEBUG_EVENT
+#if MAVLINK_FLAG_DEBUG_EVENT
             printf("Received MISSION_REQUEST_LIST message\n");
 #endif
             mavlink_mission_request_list_t mission_request_list_msg;
@@ -127,7 +130,7 @@ void mavlink_wp_message_handler(const mavlink_message_t* msg)
                 if (mission_mgr.state == STATE_IDLE) {
                     if (NB_WAYPOINT > 0) {
                         mission_mgr.state = STATE_SEND_LIST;
-#ifdef MAVLINK_FLAG_DEBUG_EVENT
+#if MAVLINK_FLAG_DEBUG_EVENT
       printf("State: %d\n", mission_mgr.state);
 #endif
                         mission_mgr.seq = 0;
@@ -149,7 +152,7 @@ void mavlink_wp_message_handler(const mavlink_message_t* msg)
 
         case MAVLINK_MSG_ID_MISSION_REQUEST:
         {
-#ifdef MAVLINK_FLAG_DEBUG_EVENT
+#if MAVLINK_FLAG_DEBUG_EVENT
             printf("Received MISSION_REQUEST message\n");
 #endif
         	mavlink_mission_request_t mission_request_msg;
@@ -161,7 +164,7 @@ void mavlink_wp_message_handler(const mavlink_message_t* msg)
         			sys_time_cancel_timer(mission_mgr.timer_id); // Cancel the timeout timer
         			
         			mission_mgr.state = STATE_SEND_ITEM;
-#ifdef MAVLINK_FLAG_DEBUG_EVENT
+#if MAVLINK_FLAG_DEBUG_EVENT
       printf("State: %d\n", mission_mgr.state);
 #endif
         			mission_mgr.seq = mission_request_msg.seq;
@@ -181,7 +184,7 @@ void mavlink_wp_message_handler(const mavlink_message_t* msg)
 
         case MAVLINK_MSG_ID_MISSION_ITEM:
         {
-#ifdef MAVLINK_FLAG_DEBUG_EVENT
+#if MAVLINK_FLAG_DEBUG_EVENT
             printf("Received MISSION_ITEM message\n");
 #endif
             mavlink_mission_item_t mission_item_msg;
@@ -197,11 +200,14 @@ void mavlink_wp_message_handler(const mavlink_message_t* msg)
                     struct UtmCoor_f utm;
                     utm.zone = nav_utm_zone0;
                     utm_of_lla_f(&utm, &lla);
-
+#if MAVLINK_FLAG_DEBUG_EVENT
                     printf("Received WP(%d): %f, %f, %f\n",mission_item_msg.seq, utm.east, utm.north, utm.alt);
-
-                    // nav_set_waypoint_latlon(mission_item_msg.seq, &lla); // move the waypoint with the id equal to seq 
+#endif
+                    // Set the new waypoint
+                    // nav_set_waypoint_latlon(mission_item_msg.seq, &lla); // move the waypoint with the id equal to seq, only for rotorcraft
                     nav_move_waypoint(mission_item_msg.seq, utm.east, utm.north, utm.alt);
+
+                    sendMissionAck();
                 }
             }
         }

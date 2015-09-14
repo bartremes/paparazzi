@@ -349,7 +349,7 @@ void mavlink_periodic(void)
 
 /**
  * Event loop MAVLink calls
- * Called at the end of the event loop (after the periodic loop is completed)
+ * Called at the end of the event loop (runs at maximum allowable frequency)
  */
 void mavlink_event(void)
 {

@@ -76,6 +76,20 @@ static inline void timer_cb(uint8_t id)
   // TODO: Handle timeout retries
 }
 
+static inline void sendMissionAck() 
+{
+  mavlink_message_t msg;
+  mavlink_mission_ack_t mission_ack;
+  mission_ack.target_system = mission_mgr.rem_sysid;
+  mission_ack.target_component = mission_mgr.rem_compid;
+  mission_ack.type = MAV_MISSION_ACCEPTED;
+  mavlink_msg_mission_ack_encode(mavlink_system.sysid, mavlink_system.compid, &msg, &mission_ack); // encode the ack message
+#if MAVLINK_FLAG_DEBUG_EVENT
+    printf("Sent MISSION_ACK message\n");
+#endif
+  mavlink_send_message(&msg);
+}
+
 extern void mavlink_mission_init(mavlink_mission_mgr* mission_mgr);
 extern void mavlink_mission_message_handler(const mavlink_message_t* msg);
 
