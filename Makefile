@@ -67,6 +67,7 @@ TMTC=sw/ground_segment/tmtc
 GENERATORS=$(PAPARAZZI_SRC)/sw/tools/generators
 JOYSTICK=sw/ground_segment/joystick
 EXT=sw/ext
+TOOLS=sw/tools
 
 #
 # build some stuff in subdirs
@@ -164,11 +165,14 @@ sim_static: libpprz
 
 ext:
 	$(MAKE) -C $(EXT)
+	$(MAKE) -C $(TOOLS)/bluegiga_usb_dongle
 
 #
 # make misc subdirs
 #
 subdirs: $(SUBDIRS)
+
+$(MISC): ext
 
 $(SUBDIRS):
 	$(MAKE) -C $@

@@ -103,6 +103,7 @@ $(TARGET).srcs += $(SRC_FIRMWARE)/guidance/guidance_h_ref.c
 $(TARGET).srcs += $(SRC_FIRMWARE)/guidance/guidance_v.c
 $(TARGET).srcs += $(SRC_FIRMWARE)/guidance/guidance_v_ref.c
 $(TARGET).srcs += $(SRC_FIRMWARE)/guidance/guidance_v_adapt.c
+$(TARGET).srcs += $(SRC_FIRMWARE)/guidance/guidance_flip.c
 
 include $(CFG_ROTORCRAFT)/navigation.makefile
 
@@ -117,15 +118,15 @@ $(TARGET).srcs += $(SRC_FIRMWARE)/autopilot.c
 $(TARGET).srcs += mcu_periph/i2c.c
 $(TARGET).srcs += $(SRC_ARCH)/mcu_periph/i2c_arch.c
 
+include $(CFG_SHARED)/uart.makefile
+
 
 #
 # Electrical subsystem / Analog Backend
 #
 $(TARGET).CFLAGS += -DUSE_ADC
 $(TARGET).srcs   += $(SRC_ARCH)/mcu_periph/adc_arch.c
-ifneq ($(ARCH), linux)
 $(TARGET).srcs   += subsystems/electrical.c
-endif
 
 
 ######################################################################
@@ -137,10 +138,6 @@ endif
 ifeq ($(BOARD), booz)
 ns_CFLAGS += -DUSE_DAC
 ns_srcs   += $(SRC_ARCH)/mcu_periph/dac_arch.c
-else ifeq ($(BOARD), ardrone)
-ns_srcs   += $(SRC_BOARD)/electrical.c
-else ifeq ($(BOARD), bebop)
-ns_srcs   += $(SRC_BOARD)/electrical.c
 endif
 
 #
@@ -170,14 +167,6 @@ endif
 ifeq ($(BOARD), ardrone)
 ns_srcs += $(SRC_BOARD)/gpio_ardrone.c
 endif
-
-
-ns_srcs += mcu_periph/uart.c
-ns_srcs += $(SRC_ARCH)/mcu_periph/uart_arch.c
-ifeq ($(ARCH), linux)
-ns_srcs += $(SRC_ARCH)/serial_port.c
-endif
-
 
 #
 # add other subsystems to rotorcraft firmware in airframe file:

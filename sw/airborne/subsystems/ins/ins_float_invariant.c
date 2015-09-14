@@ -431,7 +431,7 @@ void ins_float_invariant_propagate(struct Int32Rates* gyro, struct Int32Vect3* a
 void ins_float_invariant_update_gps(struct GpsState *gps_s)
 {
 
-  if (gps_s->fix == GPS_FIX_3D && ins_float_inv.is_aligned) {
+  if (gps_s->fix >= GPS_FIX_3D && ins_float_inv.is_aligned) {
     ins_gps_fix_once = TRUE;
 
 #if INS_FINV_USE_UTM
@@ -615,7 +615,7 @@ static inline void error_output(struct InsFloatInv *_ins)
 
   // pos and speed error only if GPS data are valid
   // or while waiting first GPS data to prevent diverging
-  if ((gps.fix == GPS_FIX_3D && ins_float_inv.is_aligned
+  if ((gps.fix >= GPS_FIX_3D && ins_float_inv.is_aligned
 #if INS_FINV_USE_UTM
        && state.utm_initialized_f
 #else
@@ -699,6 +699,6 @@ void ins_float_inv_set_body_to_imu_quat(struct FloatQuat *q_b2i)
 
   if (!ins_float_inv.is_aligned) {
     /* Set ltp_to_imu so that body is zero */
-    memcpy(&ins_float_inv.state.quat, q_b2i, sizeof(struct FloatQuat));
+    ins_float_inv.state.quat = *q_b2i;
   }
 }

@@ -1,0 +1,27 @@
+<!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
+
+<flight_plan alt="152" ground_alt="147" lat0="51.991126" lon0="4.378142" max_dist_from_home="150" name="Rotorcraft Basic (Enac)" security_height="2">
+
+  <waypoints>
+    <waypoint name="HOME" x="0.0" y="0.0"/>
+    <waypoint name="CLIMB" x="0.0" y="5.0"/>
+    <waypoint name="STDBY" x="-2.0" y="-5.0"/>
+    <waypoint name="p1" x="-3.2" y="17.7"/>
+    <waypoint name="p2" x="14.1" y="-12.3"/>
+    <waypoint name="p3" x="16.7" y="-19.6"/>
+    <waypoint name="p4" x="13.7" y="-40.7"/>
+    <waypoint name="CAM" x="19.2" y="-55.4"/>
+    <waypoint name="TD" x="5.6" y="-10.9"/>
+    <waypoint name="S1" height="30" x="-22.5" y="0.0"/>
+    <waypoint name="S2" height="30" x="22.5" y="-70.0"/>
+  </waypoints>
+
+  <includes>
+    <include name="Mission" procedure="rotorcraft_survey_mission.xml"/>
+  </includes>
+
+  <blocks>
+    <block name="Dummy"/>
+  </blocks>
+
+</flight_plan>

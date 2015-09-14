@@ -1,7 +1,101 @@
-Paparazzi 5.5_devel
-===================
+Paparazzi 5.6.0_stable
+======================
 
-currently ongoing development, changes so far (no particular order, nor complete)
+Stable version release.
+
+- compile/run paparazzi in a docker container
+  [#1272] (https://github.com/paparazzi/paparazzi/pull/1272)
+- multimon: fix compilation with gcc 5.x
+  [#1276] (https://github.com/paparazzi/paparazzi/pull/1276)
+- arch/linux: replace mcu event polling with threads
+  [#1277] (https://github.com/paparazzi/paparazzi/pull/1277)
+- ardrone2: make UART1_DEV changeable from airframe file
+- optitrack/natnet: update to version 2.7
+  [#1275] (https://github.com/paparazzi/paparazzi/pull/1275)
+  [#1284] (https://github.com/paparazzi/paparazzi/pull/1284)
+- link/GCS: fix LINK_REPORT and display of link status in GCS
+  [#1279] (https://github.com/paparazzi/paparazzi/pull/1279)
+- GPS: add hmsl to GPS_LLA message
+  [#1282] (https://github.com/paparazzi/paparazzi/pull/1282)
+- modules: set nice level for viewvideo thread
+  [#1283] (https://github.com/paparazzi/paparazzi/pull/1283)
+- arch/linux: Rename uart/udp_transmit to uart/udp_put_byte
+  [#1285] (https://github.com/paparazzi/paparazzi/pull/1285)
+- GPS: NMEA parser fixes
+  [#1287] (https://github.com/paparazzi/paparazzi/pull/1287)
+- modules: viewvideo, fix image path
+  [#1289] (https://github.com/paparazzi/paparazzi/issues/1289)
+- simulator: FlightGear visualization using native-fdm for NPS
+  [#1290] (https://github.com/paparazzi/paparazzi/pull/1290)
+- rotorcraft: INDI stabilization updates
+  [#1292] (https://github.com/paparazzi/paparazzi/pull/1292)
+- boards: add support for ELLE0
+  [#1294] (https://github.com/paparazzi/paparazzi/pull/1294)
+- arch/linux: uart: fix crash if device does not exist
+  [#1299] (https://github.com/paparazzi/paparazzi/pull/1299)
+
+
+Paparazzi 5.5.2_testing
+=======================
+
+Thirst release canditate for v5.6 stable release.
+
+- ardrone2 and bebop: disable even loop limiting again
+  [#1240] (https://github.com/paparazzi/paparazzi/pull/1240)
+- bebop: finally fix I2C address for baro
+- modules: update geo_mag to latest WMM2015 model
+  [#1270] (https://github.com/paparazzi/paparazzi/pull/1270)
+- settings: add optional target attribute and calc MD5sum according to usable settings
+  [#1157] (https://github.com/paparazzi/paparazzi/pull/1157)
+- stm32: improve I2C stability in case of stuck bus
+  [#1264] (https://github.com/paparazzi/paparazzi/pull/1264)
+- i2c: cleanup I2C_ERRORS reporting
+  [#1268] (https://github.com/paparazzi/paparazzi/pull/1268)
+- modules: add divergen calculation for opticflow
+  [#1262] (https://github.com/paparazzi/paparazzi/pull/1262)
+- python: Add some utilities and a serial link interface to decode/encode PPRZ messages over a serial link
+  [#1261] (https://github.com/paparazzi/paparazzi/pull/1261)
+- modules: mag_hmc58xx: configure MAG_HMC58XX_I2C_DEV
+  [#1274] (https://github.com/paparazzi/paparazzi/pull/1274)
+- IMU: possibility to disable mag on aspirin 2
+  [#1273] (https://github.com/paparazzi/paparazzi/pull/1273)
+- fixedwing: fix H_CTL_YAW_LOOP in stabilization adaptive
+
+
+Paparazzi 5.5.1_testing
+=======================
+
+Second release candidate for v5.6 stable release.
+
+- rotorcraft: fix stabilization INDI crash on takeoff bug
+  [#1255] (https://github.com/paparazzi/paparazzi/pull/1255)
+- airborne: change ABI_BROADCAST id from 0 to 255 and introduce ABI_DISABLE
+  [#1260] (https://github.com/paparazzi/paparazzi/pull/1260)
+- airframes: cleanup and use standard motor mixing types
+  [#1231] (https://github.com/paparazzi/paparazzi/pull/1231)
+  [#1249] (https://github.com/paparazzi/paparazzi/pull/1249)
+- ahrs: reduced default ahrs align delay
+  [#1256] (https://github.com/paparazzi/paparazzi/pull/1256)
+- add an optional board_init function and fix bat check on bebop
+  [#1253] (https://github.com/paparazzi/paparazzi/pull/1253)
+- ARDrone2: fix battery checks, needs bat_voltage_ardrone2 module now
+  [#1252] (https://github.com/paparazzi/paparazzi/pull/1252)
+- paparazzi center: improve handling of programs from control_panel.xml
+  [#1247] (https://github.com/paparazzi/paparazzi/pull/1247)
+- server: set http port, replace -kml_port option with -port
+  [#1248] (https://github.com/paparazzi/paparazzi/pull/1248)
+- logalizer: rename plot to logplotter for clarity
+  [#1226] (https://github.com/paparazzi/paparazzi/pull/1226
+- GCS: don't prove airframe dtd if served via http
+  [#1246] (https://github.com/paparazzi/paparazzi/pull/1246)
+- Fixed unsanctioned yaw unkill problem with uninitialised joysticks
+  [#1242] (https://github.com/paparazzi/paparazzi/pull/1242)
+
+
+Paparazzi 5.5.0_testing
+=======================
+
+First release candidate for v5.6 stable release.
 
 General
 -------
@@ -24,8 +118,11 @@ General
   [#1173] (https://github.com/paparazzi/paparazzi/pull/1173)
 - GCS: add new flat icon theme
   [#1193] (https://github.com/paparazzi/paparazzi/pull/1193)
+  [#1234] (https://github.com/paparazzi/paparazzi/pull/1234)
 - plotter: add support for adding constant curves via command line
   [#1227] (https://github.com/paparazzi/paparazzi/pull/1227)
+- logplotter: rename plot to logplotter for clarity
+  [#1226] (https://github.com/paparazzi/paparazzi/pull/1226)
 - ground segment: add geometry param to messages and setttings agents
   [#1232] (https://github.com/paparazzi/paparazzi/pull/1232)
 - ground segment: improve Ivy efficiency
@@ -96,6 +193,8 @@ Airborne
   [#1080] (https://github.com/paparazzi/paparazzi/pull/1080)
 - INS: update NED accel with ins_alt_float
   [#1156] (https://github.com/paparazzi/paparazzi/pull/1156)
+- INS: prevent propagation if there are no measurement updates
+  [#1241] (https://github.com/paparazzi/paparazzi/pull/1241)
 - cleanup: remove unused/unmaintained beth and fms code
   [#1162] (https://github.com/paparazzi/paparazzi/pull/1162)
 - state interface: fix LLA calculation if only UTM origin initialized
@@ -115,6 +214,7 @@ Rotorcraft firmware
   [#1170] (https://github.com/paparazzi/paparazzi/pull/1170)
 - predefined motor_mixing for common configurations
   [#1175] (https://github.com/paparazzi/paparazzi/pull/1175)
+  [#1244] (https://github.com/paparazzi/paparazzi/pull/1244)
 - heading integration protection in RC-event
   [#1174] (https://github.com/paparazzi/paparazzi/pull/1174)
 - waypoint API function naming cleanup
@@ -202,6 +302,8 @@ Linux arch support
   [#1128] (https://github.com/paparazzi/paparazzi/pull/1128)
 - I2C: use 8 bit I2C address scheme for all drivers
   [#1210] (https://github.com/paparazzi/paparazzi/issues/1210)
+- limit main loop to 1kHz to prevent 100% cpu usage due to event polling
+  [#1240] (https://github.com/paparazzi/paparazzi/pull/1240)
 
 other drivers/HW support
 ------------------------

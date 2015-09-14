@@ -448,7 +448,9 @@ let create_ac = fun alert (geomap:G.widget) (acs_notebook:GPack.notebook) (strip
   (** Get the airframe file *)
   let af_url = Pprz.string_assoc "airframe" config in
   let af_file =  Http.file_of_url af_url in
-  let af_xml = ExtXml.parse_file af_file in
+  (* do not check dtd if it is a http url *)
+  let via_http = Str.string_match (Str.regexp "http") af_url 0 in
+  let af_xml = ExtXml.parse_file ~noprovedtd:via_http af_file in
 
   (** Get an alternate speech name if available *)
   let speech_name = get_speech_name af_xml name in
@@ -1290,7 +1292,7 @@ let listen_flight_params = fun geomap auto_center_new_ac alert alt_graph ->
         match ap_mode with
             "AUTO2" | "NAV" -> ok_color
           | "AUTO1" | "R_RCC" | "A_RCC" | "ATT_C" | "R_ZH" | "A_ZH" | "HOVER" | "HOV_C" | "H_ZH" | "MODULE" -> "#10F0E0"
-          | "MANUAL" | "RATE" | "ATT" | "RC_D" | "CF" | "FWD" -> warning_color
+          | "MANUAL" | "RATE" | "ATT" | "RC_D" | "CF" | "FWD" | "FLIP" -> warning_color
           | _ -> alert_color in
       ac.strip#set_color "AP" color;
     end;
@@ -1300,7 +1302,7 @@ let listen_flight_params = fun geomap auto_center_new_ac alert alt_graph ->
       then status_filter_mode
       else Pprz.string_assoc "gps_mode" vs in
     ac.strip#set_label "GPS" gps_mode;
-    ac.strip#set_color "GPS" (if gps_mode<>"3D" then alert_color else ok_color);
+    ac.strip#set_color "GPS" (if gps_mode<>"3D" && gps_mode<>"DGPS" && gps_mode<>"RTK" then alert_color else ok_color);
     let ft =
       sprintf "%02d:%02d:%02d" (flight_time / 3600) ((flight_time / 60) mod 60) (flight_time mod 60) in
     ac.strip#set_label "flight_time" ft;
