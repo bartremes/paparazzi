@@ -68,12 +68,12 @@ static inline void timer_cb(uint8_t id)
 {
   sys_time_cancel_timer(id); // Cancel the timer that triggered the timeout event
   mission_mgr.state = STATE_IDLE;
-#ifdef MAVLINK_FLAG_DEBUG
+#if MAVLINK_FLAG_DEBUG
   perror("Request timed out!");
 #else
   // TODO: Fix for stm32 etc.
 #endif
-  // TODO: Handle timeout retries
+  // TODO: Handle timeout retries, for now just assume no retries
 }
 
 static inline void sendMissionAck() 

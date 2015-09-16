@@ -33,10 +33,46 @@
 #include <string.h>
 
 // #include "subsystems/navigation/waypoints.h"
-#include "subsystems/navigation/common_nav.h"
+#include "subsystems/navigation/common_nav.h" // for fixed-wing aircraft
 
 #include "modules/datalink/mavlink.h"
 #include "modules/datalink/missionlib/mission_manager.h"
+
+static void mavlink_update_wp_list(void) 
+{
+    // Store the waypoints in a mission item    
+    if (NB_WAYPOINT > 0) {
+        for (uint8_t i = 0; i < NB_WAYPOINT; i++) {
+            mavlink_mission_item_t mission_item;
+
+            /* 
+             * Convert ENU waypoint to UTM
+             * May be removed, but nav_move_waypoint() uses UTM coordinates in case of fixed-wing aircraft
+             */
+            struct UtmCoor_f utm;
+            utm.east = waypoints[i].x + nav_utm_east0;
+            utm.north = waypoints[i].y + nav_utm_north0;
+            utm.alt = waypoints[i].a;
+            utm.zone = nav_utm_zone0;
+
+            // Convert UTM waypoint to LLA
+            struct LlaCoor_f lla;
+            lla_of_utm_f(&lla, &utm);
+            mission_item.x = lla.lat; // lattitude
+            mission_item.y = lla.lon; // longtitude
+            mission_item.z = lla.alt; // altitude
+            mission_item.seq = i;
+
+            mission_mgr.waypoints[i] = mission_item;
+        }
+    } else {
+#if MAVLINK_FLAG_DEBUG_EVENT
+        perror("The waypoint array is empty\n");
+#else
+        // TODO: Fix for stm32 etc.
+#endif
+    }
+}
 
 static void mavlink_send_wp_count(void)
 {
@@ -81,38 +117,7 @@ static void mavlink_send_wp(uint16_t seq)
 
 void mavlink_wp_init(void)
 {
-    // Store the waypoints in a mission item    
-    if (NB_WAYPOINT > 0) {
-        for (uint8_t i = 0; i < NB_WAYPOINT; i++) {
-            mavlink_mission_item_t mission_item;
-
-            /* 
-             * Convert ENU waypoint to UTM
-             * Imay be removed, but nav_move_waypoint() uses UTM coordinates in case of fixed-wing aircraft
-             */
-            struct UtmCoor_f utm;
-            utm.east = waypoints[i].x + nav_utm_east0;
-            utm.north = waypoints[i].y + nav_utm_north0;
-            utm.alt = waypoints[i].a;
-            utm.zone = nav_utm_zone0;
-
-            // Convert UTM waypoint to LLA
-            struct LlaCoor_f lla;
-            lla_of_utm_f(&lla, &utm);
-            mission_item.x = lla.lat; // lattitude
-            mission_item.y = lla.lon; // longtitude
-            mission_item.z = lla.alt; // altitude
-            mission_item.seq = i;
-
-            mission_mgr.waypoints[i] = mission_item;
-        }
-    } else {
-#if MAVLINK_FLAG_DEBUG_EVENT
-        perror("The waypoint array is empty\n");
-#else
-        // TODO: Fix for stm32 etc.
-#endif
-    }
+    mavlink_update_wp_list();
 }
 
 void mavlink_wp_message_handler(const mavlink_message_t* msg)
@@ -168,6 +173,8 @@ void mavlink_wp_message_handler(const mavlink_message_t* msg)
       printf("State: %d\n", mission_mgr.state);
 #endif
         			mission_mgr.seq = mission_request_msg.seq;
+
+                    mavlink_update_wp_list(); // Update the waypoint list
 
         			mavlink_send_wp(mission_mgr.seq);
 

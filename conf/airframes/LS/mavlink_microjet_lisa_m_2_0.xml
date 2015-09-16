@@ -9,7 +9,7 @@
 <airframe name="Microjet Lisa/M 2.0">
 
   <firmware name="fixedwing">
-    <target name="sim" 	board="pc"/>
+    <target name="sim" 	 board="pc"/>
     <target name="nps"   board="pc">
       <subsystem name="fdm" type="jsbsim"/>
     </target>

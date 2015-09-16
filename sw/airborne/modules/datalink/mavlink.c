@@ -133,7 +133,7 @@ static void mavlink_send_altitude_ground_speed(void)
    							            mavlink_system.compid, // component id
    							            &msg, // MAVLink message
    							            -1, // airspeed
-                            *stateGetHorizontalSpeedNorm_f(), // groundspeed
+                            stateGetHorizontalSpeedNorm_f(), // groundspeed
                             -1, // heading
                             0,  // throttle setting
                             stateGetPositionNed_f()->z, // altitude
@@ -282,8 +282,8 @@ int mavlink_send_message(mavlink_message_t* msg)
 void mavlink_init(void)
 {
 	// Initialize MAVLink
-	mavlink_system.sysid = 5;
-	mavlink_system.compid = 20;
+	mavlink_system.sysid = MAVLINK_SYSTEM_SYSID;
+	mavlink_system.compid = MAVLINK_SYSTEM_COMPID;
 	mavlink_mission_init(&mission_mgr);
 
 	// Create socket
