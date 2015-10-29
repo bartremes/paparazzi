@@ -220,6 +220,8 @@ void ins_reset_local_origin(void)
     ins_int.ltp_def.hmsl = gps.hmsl;
     ins_int.ltp_initialized = TRUE;
     stateSetLocalOrigin_i(&ins_int.ltp_def);
+
+    printf("Set local origin from GPS\n");
   }
   else {
     ins_int.ltp_initialized = FALSE;

@@ -28,6 +28,8 @@
 #include "subsystems/datalink/downlink.h"
 #include "generated/flight_plan.h"
 
+#include <stdio.h>
+
 const uint8_t nb_waypoint = NB_WAYPOINT;
 struct Waypoint waypoints[NB_WAYPOINT];
 
@@ -282,7 +284,13 @@ void waypoints_localize_all(void)
 struct LlaCoor_i *waypoint_get_lla(uint8_t wp_id)
 {
   if (wp_id < nb_waypoint) {
+
+    printf("This function is called\n");
+
     if (!bit_is_set(waypoints[wp_id].flags, WP_FLAG_LLA_I)) {
+
+      printf("Globalize!\n");
+
       waypoint_globalize(wp_id);
     }
     return &waypoints[wp_id].lla;

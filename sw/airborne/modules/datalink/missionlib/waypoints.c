@@ -32,8 +32,8 @@
 #include <stdio.h>
 #include <string.h>
 
-// #include "subsystems/navigation/waypoints.h"
-#include "subsystems/navigation/common_nav.h" // for fixed-wing aircraft
+#include "subsystems/navigation/waypoints.h"
+//#include "subsystems/navigation/common_nav.h" // for fixed-wing aircraft
 
 #include "modules/datalink/mavlink.h"
 #include "modules/datalink/missionlib/mission_manager.h"
@@ -42,27 +42,44 @@ static void mavlink_update_wp_list(void)
 {
     // Store the waypoints in a mission item    
     if (NB_WAYPOINT > 0) {
+//        for (uint8_t i = 0; i < NB_WAYPOINT; i++) {
+//            mavlink_mission_item_t mission_item;
+//
+//            /*
+//             * Convert ENU waypoint to UTM
+//             * May be removed, but nav_move_waypoint() uses UTM coordinates in case of fixed-wing aircraft
+//             */
+//            struct UtmCoor_f utm;
+//            utm.east = waypoints[i].x + nav_utm_east0;
+//            utm.north = waypoints[i].y + nav_utm_north0;
+//            utm.alt = waypoints[i].a;
+//            utm.zone = nav_utm_zone0;
+//
+//            // Convert UTM waypoint to LLA
+//            struct LlaCoor_f lla;
+//            lla_of_utm_f(&lla, &utm);
+//            mission_item.x = lla.lat; // lattitude
+//            mission_item.y = lla.lon; // longtitude
+//            mission_item.z = lla.alt; // altitude
+//            mission_item.seq = i;
+//
+//            mission_mgr.waypoints[i] = mission_item;
+//        }
         for (uint8_t i = 0; i < NB_WAYPOINT; i++) {
-            mavlink_mission_item_t mission_item;
+            mavlink_mission_item_t mission_item; 
+            // waypoint_set_global_flag(i);
+            if (waypoint_is_global(i))
+                printf("Waypoint(%d): is global\n", i);
+            else
+                printf("Waypoint(%d): is NOT global\n", i);
+            waypoint_globalize(i);
+            mission_item.x = (float)waypoint_get_lla(i)->lat*1e-7; // lattitude
+            mission_item.y = (float)waypoint_get_lla(i)->lon*1e-7; // longtitude
+            mission_item.z = (float)waypoint_get_lla(i)->alt*1e-3; // altitude
 
-            /* 
-             * Convert ENU waypoint to UTM
-             * May be removed, but nav_move_waypoint() uses UTM coordinates in case of fixed-wing aircraft
-             */
-            struct UtmCoor_f utm;
-            utm.east = waypoints[i].x + nav_utm_east0;
-            utm.north = waypoints[i].y + nav_utm_north0;
-            utm.alt = waypoints[i].a;
-            utm.zone = nav_utm_zone0;
+            printf("WP: %f, %f, %f\n", mission_item.x, mission_item.y, mission_item.z);
 
-            // Convert UTM waypoint to LLA
-            struct LlaCoor_f lla;
-            lla_of_utm_f(&lla, &utm);
-            mission_item.x = lla.lat; // lattitude
-            mission_item.y = lla.lon; // longtitude
-            mission_item.z = lla.alt; // altitude
             mission_item.seq = i;
-
             mission_mgr.waypoints[i] = mission_item;
         }
     } else {
@@ -165,7 +182,7 @@ void mavlink_wp_message_handler(const mavlink_message_t* msg)
         	if(mission_request_msg.target_system == mavlink_system.sysid) {	
         		if ((mission_mgr.state == STATE_SEND_LIST && mission_request_msg.seq == 0) || // Send the first waypoint
         				(mission_mgr.state == STATE_SEND_ITEM && (mission_request_msg.seq == mission_mgr.seq || // Send the current waypoint again
-                                                                  mission_request_msg.seq == mission_mgr.seq+1))) { // Send the next waypoiny
+                                                                  mission_request_msg.seq == mission_mgr.seq+1))) { // Send the next waypoint
         			sys_time_cancel_timer(mission_mgr.timer_id); // Cancel the timeout timer
         			
         			mission_mgr.state = STATE_SEND_ITEM;
@@ -199,20 +216,20 @@ void mavlink_wp_message_handler(const mavlink_message_t* msg)
             
             if(mission_item_msg.target_system == mavlink_system.sysid) {              
                 if (mission_mgr.state == STATE_IDLE) { // Only handle incoming mission item messages if there a not currently being sent
-                    struct LlaCoor_f lla;
-                    lla.lat = mission_item_msg.x; // lattitude in rad
-                    lla.lon = mission_item_msg.y; // longitude in rad
-                    lla.alt = mission_item_msg.z; // altitude in meters
+                    struct LlaCoor_i lla;
+                    lla.lat = (int32_t)(mission_item_msg.x*1e7); // lattitude in degrees*1e7
+                    lla.lon = (int32_t)(mission_item_msg.y*1e7); // longitude in degrees*1e7
+                    lla.alt = (int32_t)(mission_item_msg.z*1e3); // altitude in millimeters
 
-                    struct UtmCoor_f utm;
-                    utm.zone = nav_utm_zone0;
-                    utm_of_lla_f(&utm, &lla);
+//                    struct UtmCoor_f utm;
+//                    utm.zone = nav_utm_zone0;
+//                    utm_of_lla_f(&utm, &lla);
 #if MAVLINK_FLAG_DEBUG_EVENT
-                    printf("Received WP(%d): %f, %f, %f\n",mission_item_msg.seq, utm.east, utm.north, utm.alt);
+                    printf("Received WP(%d): %d, %d, %d\n",mission_item_msg.seq, lla.lat, lla.lon, lla.alt);
 #endif
                     // Set the new waypoint
-                    // nav_set_waypoint_latlon(mission_item_msg.seq, &lla); // move the waypoint with the id equal to seq, only for rotorcraft
-                    nav_move_waypoint(mission_item_msg.seq, utm.east, utm.north, utm.alt);
+                    waypoint_move_lla(mission_item_msg.seq, &lla); // move the waypoint with the id equal to seq, only for rotorcraft
+//                    nav_move_waypoint(mission_item_msg.seq, utm.east, utm.north, utm.alt);
 
                     sendMissionAck();
                 }

@@ -440,6 +440,9 @@ extern void stateInit(void);
 /// Set the local (flat earth) coordinate frame origin (int).
 static inline void stateSetLocalOrigin_i(struct LtpDef_i *ltp_def)
 {
+
+  printf("Set local origin\n");
+
   state.ned_origin_i = *ltp_def;
   /* convert to float */
   ECEF_FLOAT_OF_BFP(state.ned_origin_f.ecef, state.ned_origin_i.ecef);

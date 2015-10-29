@@ -33,8 +33,9 @@
       <define name="FILE_LOGGER_PATH" value="/data/ftp/internal_000"/>
     </load>
     <load name="mavlink.xml">
-      <define name="MAVLINK_FLAG_DEBUG" value="1"/>
-      <define name="MAVLINK_IP_ADDRESS" value="192.168.42.4"/>
+      <define name="MAVLINK_FLAG_DEBUG_EVENT"   value="1"/>
+      <define name="MAVLINK_IP_ADDRESS"         value="192.168.42.2"/>
+      <define name="MAVLINK_SYSTEM_SYSID"       value="1"/>
     </load>
   </modules>
 
