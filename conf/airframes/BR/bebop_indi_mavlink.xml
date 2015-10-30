@@ -39,7 +39,7 @@
     </load-->
     <load name="mavlink.xml">
       <define name="MAVLINK_FLAG_DEBUG_EVENT"   value="1"/>
-      <define name="MAVLINK_IP_ADDRESS"         value="192.168.42.3"/>
+      <define name="MAVLINK_IP_ADDRESS"         value="192.168.42.2"/>
       <define name="MAVLINK_SYSTEM_SYSID"       value="1"/>
     </load>
  <!--   <load name="video_thread.xml">
