@@ -37,10 +37,10 @@
 
   <servos driver="Pwm">
     <servo name="THROTTLE"   no="0" min="1000" neutral="1000" max="2000"/>
-    <servo name="FRONT"      no="1" min="2100" neutral="1500" max="900"/>
-    <servo name="RIGHTBACK"  no="2" min="900"  neutral="1500" max="2100"/>
-    <servo name="LEFTBACK"   no="3" min="2100" neutral="1500" max="900"/>
-    <servo name="TAIL"       no="4" min="1100" neutral="1450" max="1800"/>
+    <servo name="BACK"      no="1" min="2100" neutral="1500" max="900"/>
+    <servo name="LEFTFRONT"  no="2" min="900"  neutral="1500" max="2100"/>
+    <servo name="RIGHTFRONT"   no="3" min="2100" neutral="1500" max="900"/>
+    <servo name="TAIL"       no="4" min="1350" neutral="1550" max="1850"/>
   </servos>
 
   <commands>
@@ -61,7 +61,7 @@
 
   <section name="MIXING" prefix="SW_MIXING_">
     <!-- front left (CW), front right (CCW), back right (CW), back left (CCW) -->
-    <define name="TYPE" value="H120"/>
+    <define name="TYPE" value="HR120"/>
     <define name="TRIM_ROLL"  value="0"/>
     <define name="TRIM_PITCH" value="0"/>
     <define name="TRIM_COLL"  value="0"/>
