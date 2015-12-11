@@ -97,12 +97,13 @@ struct Int32Rates stabilization_rate_fb_cmd;
 
 static void send_rate(struct transport_tx *trans, struct link_device *dev)
 {
+  int32_t bla = OFFSET_AND_ROUND2((stabilization_rate_igain.r  * stabilization_rate_sum_err.r), 10);
   pprz_msg_send_RATE_LOOP(trans, dev, AC_ID,
                           &stabilization_rate_sp.p,
                           &stabilization_rate_sp.q,
                           &stabilization_rate_sp.r,
                           &stabilization_rate_sum_err.p,
-                          &stabilization_rate_sum_err.q,
+                          &bla,
                           &stabilization_rate_sum_err.r,
                           &stabilization_rate_fb_cmd.p,
                           &stabilization_rate_fb_cmd.q,
@@ -212,8 +213,11 @@ void stabilization_rate_run(bool_t in_flight)
   stabilization_cmd[COMMAND_YAW]   = stabilization_rate_fb_cmd.r >> 11;
 
   /* bound the result */
-  BoundAbs(stabilization_cmd[COMMAND_ROLL], MAX_PPRZ);
-  BoundAbs(stabilization_cmd[COMMAND_PITCH], MAX_PPRZ);
-  BoundAbs(stabilization_cmd[COMMAND_YAW], MAX_PPRZ);
+//   BoundAbs(stabilization_cmd[COMMAND_ROLL], MAX_PPRZ);
+//   BoundAbs(stabilization_cmd[COMMAND_PITCH], MAX_PPRZ);
+//   BoundAbs(stabilization_cmd[COMMAND_YAW], MAX_PPRZ);
+  BoundAbs(stabilization_cmd[COMMAND_ROLL], 5000);
+  BoundAbs(stabilization_cmd[COMMAND_PITCH], 5000);
+  BoundAbs(stabilization_cmd[COMMAND_YAW], 5000);
 
 }

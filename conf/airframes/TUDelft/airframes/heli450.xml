@@ -19,8 +19,8 @@
     </subsystem>
 
     <subsystem name="actuators"     type="pwm"/>
-    <!--<subsystem name="telemetry"     type="xbee_api"/>-->
-    <subsystem name="telemetry"     type="transparent"/>
+    <subsystem name="telemetry"     type="xbee_api"/>
+<!--     <subsystem name="telemetry"     type="transparent"/> -->
     <subsystem name="imu"           type="aspirin_v2.2"/>
     <subsystem name="gps"           type="ublox"/>
     <subsystem name="stabilization" type="int_quat"/>
@@ -36,6 +36,7 @@
     <load name="gps_ubx_ucenter.xml"/>
     <load name="heli_swashplate_mixing.xml"/>
     <load name="heli_throttle_curve.xml"/>
+    <load name="logger_spi_link.xml"/>
   </modules>
 
   <servos driver="Pwm">
@@ -82,7 +83,7 @@
 
   <heli_curves>
     <curve throttle="0,4800,7200,8400,9600" collective="-1000,750,2500,4250,6000"/>
-    <curve throttle="9600,7200,9600" collective="-7500,0,7500"/>
+<!--     <curve throttle="9600,7200,9600" collective="-7500,0,7500"/> -->
   </heli_curves>
 
   <section name="MISC">
@@ -129,11 +130,11 @@
     <!-- feedback -->
     <define name="GAIN_P" value="400"/>
     <define name="GAIN_Q" value="400"/>
-    <define name="GAIN_R" value="2000"/>
+    <define name="GAIN_R" value="1000"/>
 
-    <define name="IGAIN_P" value="75"/>
-    <define name="IGAIN_Q" value="75"/>
-    <define name="IGAIN_R" value="50"/>
+    <define name="IGAIN_P" value="150"/>
+    <define name="IGAIN_Q" value="150"/>
+    <define name="IGAIN_R" value="400"/>
   </section>
 
 
@@ -170,9 +171,9 @@
     <define name="PSI_IGAIN" value="10"/>
 
     <!-- feedforward -->
-    <define name="PHI_DDGAIN" value=" 200"/>
-    <define name="THETA_DDGAIN" value=" 200"/>
-    <define name="PSI_DDGAIN" value=" 200"/>
+    <define name="PHI_DDGAIN" value=" 0"/>
+    <define name="THETA_DDGAIN" value=" 0"/>
+    <define name="PSI_DDGAIN" value=" 0"/>
   </section>
 
   <section name="GUIDANCE_V" prefix="GUIDANCE_V_">
