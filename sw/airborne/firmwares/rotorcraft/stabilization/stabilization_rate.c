@@ -30,6 +30,7 @@
 
 #include "firmwares/rotorcraft/stabilization.h"
 #include "firmwares/rotorcraft/stabilization/stabilization_rate.h"
+#include "firmwares/rotorcraft/stabilization/stabilization_attitude_quat_indi.h"
 
 #include "state.h"
 
@@ -71,6 +72,21 @@ struct Int32Rates stabilization_rate_sum_err;
 
 struct Int32Rates stabilization_rate_fb_cmd;
 
+#define CYCLIC_SERVO_DELAY 18
+#define TAIL_SERVO_DELAY 14
+struct FloatRates indi_rate_inputs = {0.0, 0.0, 0.0};
+struct FloatRates indi_rate_inputs_act = {0.0, 0.0, 0.0};
+struct FloatRates indi_rate_inputs_filt = {0.0, 0.0, 0.0};
+float servo_delay_p[CYCLIC_SERVO_DELAY];
+float servo_delay_q[CYCLIC_SERVO_DELAY];
+float servo_delay_r[TAIL_SERVO_DELAY];
+int8_t delay_pos_p  = 0;
+int8_t delay_pos_q  = 0;
+int8_t delay_pos_r  = 0;
+float filt_so_r = 0;
+float indi_rate_inputs_filt_sec_r = 0;
+float tail_gain = 0.5;
+
 #ifndef STABILIZATION_RATE_DEADBAND_P
 #define STABILIZATION_RATE_DEADBAND_P 0
 #endif
@@ -98,14 +114,14 @@ struct Int32Rates stabilization_rate_fb_cmd;
 
 static void send_rate(struct transport_tx *trans, struct link_device *dev)
 {
-  int32_t bla = OFFSET_AND_ROUND2((stabilization_rate_igain.r  * stabilization_rate_sum_err.r), 10);
+  float commando_roll = stabilization_cmd[COMMAND_ROLL];
   pprz_msg_send_RATE_LOOP(trans, dev, AC_ID,
                           &stabilization_rate_sp.p,
                           &stabilization_rate_sp.q,
                           &stabilization_rate_sp.r,
-                          &stabilization_rate_sum_err.p,
-                          &bla,
-                          &stabilization_rate_sum_err.r,
+                          &commando_roll,
+                          &indi_rate_inputs_filt.p,
+                          &commando_roll,
                           &stabilization_rate_fb_cmd.p,
                           &stabilization_rate_fb_cmd.q,
                           &stabilization_rate_fb_cmd.r,
@@ -183,10 +199,34 @@ void stabilization_rate_read_rc_switched_sticks(void)
 void stabilization_rate_enter(void)
 {
   INT_RATES_ZERO(stabilization_rate_sum_err);
+  FLOAT_RATES_ZERO(indi_rate_inputs_act);
+  FLOAT_RATES_ZERO(indi_rate_inputs_filt);
+  FLOAT_RATES_ZERO(indi_rate_inputs);
+
+  for(int8_t i = 0; i < CYCLIC_SERVO_DELAY; i++) {
+    servo_delay_p[i] = 0;
+    servo_delay_q[i] = 0;
+  }
+
+  for(int8_t i = 0; i < TAIL_SERVO_DELAY; i++) {
+    servo_delay_r[i] = 0;
+  }
+
+  delay_pos_p  = 0;
+  delay_pos_q  = 0;
+  delay_pos_r  = 0;
+
+  filt_so_r = 0;
+  indi_rate_inputs_filt_sec_r = 0;
 }
 
 void stabilization_rate_run(bool_t in_flight)
 {
+  indi_rate_inputs.p = stabilization_cmd[COMMAND_ROLL];
+  indi_rate_inputs.q = stabilization_cmd[COMMAND_PITCH];
+  indi_rate_inputs.r = stabilization_cmd[COMMAND_YAW];
+  stabilization_filter_inputs();
+
   /* compute feed-back command */
   struct Int32Rates _error;
   struct Int32Rates *body_rate = stateGetBodyRates_i();
@@ -216,6 +256,33 @@ void stabilization_rate_run(bool_t in_flight)
   stabilization_cmd[COMMAND_PITCH] = stabilization_rate_fb_cmd.q >> 11;
   stabilization_cmd[COMMAND_YAW]   = stabilization_rate_fb_cmd.r >> 11;
 
+  if(radio_control.values[RADIO_MODE] > -4500) {
+    struct FloatRates *body_rate_f = stateGetBodyRates_f();
+
+    struct FloatRates rate_sp = { RATE_FLOAT_OF_BFP(stabilization_rate_sp.p), RATE_FLOAT_OF_BFP(stabilization_rate_sp.q), RATE_FLOAT_OF_BFP(stabilization_rate_sp.r) };
+
+    struct FloatRates rate_error;
+    RATES_DIFF(rate_error, rate_sp, (*body_rate_f));
+
+    float prev_filt_so_r = filt_so_r;
+    filt_so_r *= 19;
+    filt_so_r += body_rate_f->r;
+    filt_so_r /= 20;
+
+    float angular_accel_r = (filt_so_r - prev_filt_so_r)*512.0;
+
+    float angular_accel_ref_r = rate_error.r*tail_gain;
+    float du_r =  350.0 * (angular_accel_ref_r - angular_accel_r);
+
+    stabilization_cmd[COMMAND_ROLL]  = indi_rate_inputs_filt.p + rate_error.p*1200.0;
+    stabilization_cmd[COMMAND_PITCH]  = indi_rate_inputs_filt.q + rate_error.q*1200.0;
+    stabilization_cmd[COMMAND_YAW]  = indi_rate_inputs_filt_sec_r + du_r;
+
+    stabilization_rate_sum_err.p = 0;
+    stabilization_rate_sum_err.q = 0;
+    stabilization_rate_sum_err.r = 0;
+  }
+
   /* bound the result */
 //   BoundAbs(stabilization_cmd[COMMAND_ROLL], MAX_PPRZ);
 //   BoundAbs(stabilization_cmd[COMMAND_PITCH], MAX_PPRZ);
@@ -224,4 +291,59 @@ void stabilization_rate_run(bool_t in_flight)
   BoundAbs(stabilization_cmd[COMMAND_PITCH], 5000);
   BoundAbs(stabilization_cmd[COMMAND_YAW], 5000);
 
+}
+
+void stabilization_filter_inputs(void) {
+  servo_delay_p[delay_pos_p] =  indi_rate_inputs.p;
+  servo_delay_q[delay_pos_q] =  indi_rate_inputs.q;
+  servo_delay_r[delay_pos_r] =  indi_rate_inputs.r;
+
+  delay_pos_p += 1;
+  if(delay_pos_p == CYCLIC_SERVO_DELAY)
+    delay_pos_p = 0;
+
+  delay_pos_q += 1;
+  if(delay_pos_q == CYCLIC_SERVO_DELAY)
+    delay_pos_q = 0;
+
+  delay_pos_r += 1;
+  if(delay_pos_r == TAIL_SERVO_DELAY)
+    delay_pos_r = 0;
+
+  struct FloatRates indi_rate_inputs_act_prev = {indi_rate_inputs_act.p, indi_rate_inputs_act.q, indi_rate_inputs_act.r};
+  indi_rate_inputs_act.p = indi_rate_inputs_act.p + 0.12*(servo_delay_p[delay_pos_p] - indi_rate_inputs_act.p);
+  indi_rate_inputs_act.q = indi_rate_inputs_act.q + 0.12*(servo_delay_q[delay_pos_q] - indi_rate_inputs_act.q);
+  indi_rate_inputs_act.r = indi_rate_inputs_act.r + 0.12*(servo_delay_r[delay_pos_r] - indi_rate_inputs_act.r);
+
+  float max_servo_rate = 220;
+  float max_servo_rate_r = 450;
+
+  if( (indi_rate_inputs_act.p - indi_rate_inputs_act_prev.p) > max_servo_rate) {
+    indi_rate_inputs_act.p = indi_rate_inputs_act_prev.p + max_servo_rate;
+  }
+  else if( (indi_rate_inputs_act.p-indi_rate_inputs_act_prev.p) < -max_servo_rate) {
+    indi_rate_inputs_act.p = indi_rate_inputs_act_prev.p - max_servo_rate;
+  }
+
+  if( (indi_rate_inputs_act.q - indi_rate_inputs_act_prev.q) > max_servo_rate) {
+    indi_rate_inputs_act.q = indi_rate_inputs_act_prev.q + max_servo_rate;
+  }
+  else if( (indi_rate_inputs_act.q-indi_rate_inputs_act_prev.q) < -max_servo_rate) {
+    indi_rate_inputs_act.q = indi_rate_inputs_act_prev.q - max_servo_rate;
+  }
+
+  if( (indi_rate_inputs_act.r - indi_rate_inputs_act_prev.r) > max_servo_rate_r) {
+    indi_rate_inputs_act.r = indi_rate_inputs_act_prev.r + max_servo_rate_r;
+  }
+  else if( (indi_rate_inputs_act.r-indi_rate_inputs_act_prev.r) < -max_servo_rate_r) {
+    indi_rate_inputs_act.r = indi_rate_inputs_act_prev.r - max_servo_rate_r;
+  }
+
+  RATES_SMUL(indi_rate_inputs_filt, indi_rate_inputs_filt, 19);
+  RATES_ADD(indi_rate_inputs_filt, indi_rate_inputs_act);
+  RATES_SDIV(indi_rate_inputs_filt, indi_rate_inputs_filt, 20);
+
+  indi_rate_inputs_filt_sec_r *= 19;
+  indi_rate_inputs_filt_sec_r += indi_rate_inputs_filt.r;
+  indi_rate_inputs_filt_sec_r /= 20;
 }

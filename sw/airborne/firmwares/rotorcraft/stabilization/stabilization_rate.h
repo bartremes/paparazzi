@@ -35,6 +35,7 @@ extern void stabilization_rate_read_rc(void);
 extern void stabilization_rate_read_rc_switched_sticks(void);
 extern void stabilization_rate_run(bool_t in_flight);
 extern void stabilization_rate_enter(void);
+extern void stabilization_filter_inputs(void);
 
 extern struct Int32Rates stabilization_rate_sp;
 extern struct Int32Rates stabilization_rate_gain;
@@ -46,5 +47,7 @@ extern struct Int32Rates stabilization_rate_sum_err;
 
 extern struct Int32Rates stabilization_rate_fb_cmd;
 extern struct Int32Rates stabilization_rate_ff_cmd;
+
+extern float tail_gain;
 
 #endif /* STABILIZATION_RATE */

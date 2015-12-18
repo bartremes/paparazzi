@@ -54,6 +54,7 @@ void high_speed_logger_spi_link_init(void)
 #include "state.h"
 #include "modules/helicopter/throttle_curve.h"
 #include "firmwares/rotorcraft/stabilization/stabilization_attitude.h"
+#include "modules/adcs/adc_generic.h"
 
 void high_speed_logger_spi_link_periodic(void)
 {
@@ -70,7 +71,7 @@ void high_speed_logger_spi_link_periodic(void)
     high_speed_logger_spi_link_data.mag_y      = att_quat->qx;
     high_speed_logger_spi_link_data.mag_z      = att_quat->qy;
     high_speed_logger_spi_link_data.phi        = att_quat->qz;
-    high_speed_logger_spi_link_data.theta      = throttle_curve.collective;
+    high_speed_logger_spi_link_data.theta      = adc_generic_val1;
     high_speed_logger_spi_link_data.psi        = throttle_curve.throttle;
     high_speed_logger_spi_link_data.extra1     = stabilization_cmd[COMMAND_ROLL];
     high_speed_logger_spi_link_data.extra2     = stabilization_cmd[COMMAND_PITCH];
