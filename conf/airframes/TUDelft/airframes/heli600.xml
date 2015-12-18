@@ -36,7 +36,11 @@
     <load name="gps_ubx_ucenter.xml"/>
     <load name="heli_swashplate_mixing.xml"/>
     <load name="heli_throttle_curve.xml"/>
-<!--     <load name="logger_spi_link.xml"/> -->
+    <load name="logger_spi_link.xml"/>
+    <load name="adc_generic.xml">
+      <configure name="ADC_CHANNEL_GENERIC1" value="ADC_2"/>
+      <define name="ADC_CHANNEL_GENERIC_NB_SAMPLES" value="1"/>
+    </load>
   </modules>
 
   <servos driver="Pwm">
