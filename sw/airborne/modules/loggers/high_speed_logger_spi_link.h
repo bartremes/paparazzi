@@ -32,9 +32,9 @@ extern void high_speed_logger_spi_link_periodic(void);
 
 struct PACKED high_speed_logger_spi_link_data {
   int32_t id;         // 1
-  int32_t gyro_p;     // 2
-  int32_t gyro_q;
-  int32_t gyro_r;
+  float gyro_p;     // 2
+  float gyro_q;
+  float gyro_r;
   int32_t acc_x;      // 5
   int32_t acc_y;
   int32_t acc_z;
