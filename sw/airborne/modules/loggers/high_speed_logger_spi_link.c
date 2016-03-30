@@ -60,10 +60,11 @@ void high_speed_logger_spi_link_periodic(void)
 {
   if (high_speed_logger_spi_link_ready) {
     struct Int32Quat *att_quat = stateGetNedToBodyQuat_i();
+    struct FloatRates *frates = stateGetBodyRates_f();
     high_speed_logger_spi_link_ready = FALSE;
-    high_speed_logger_spi_link_data.gyro_p     = imu.gyro.p;
-    high_speed_logger_spi_link_data.gyro_q     = imu.gyro.q;
-    high_speed_logger_spi_link_data.gyro_r     = imu.gyro.r;
+    high_speed_logger_spi_link_data.gyro_p     = frates->p;
+    high_speed_logger_spi_link_data.gyro_q     = frates->q;
+    high_speed_logger_spi_link_data.gyro_r     = frates->r;
     high_speed_logger_spi_link_data.acc_x      = imu.accel.x;
     high_speed_logger_spi_link_data.acc_y      = imu.accel.y;
     high_speed_logger_spi_link_data.acc_z      = imu.accel.z;

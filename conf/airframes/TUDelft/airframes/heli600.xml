@@ -86,7 +86,7 @@
   </command_laws>
 
   <heli_curves>
-    <curve throttle="0,4800,7200,8400,9600" collective="-1000,750,2500,4250,6000"/>
+    <curve throttle="0,2400,4800,7200,9600" collective="-3000,-2000,-1000,0,1000"/>
 <!--     <curve throttle="9600,7200,9600" collective="-7500,0,7500"/> -->
   </heli_curves>
 
@@ -132,8 +132,8 @@
     <define name="DEADBAND_R" value="200"/>
 
     <!-- feedback -->
-    <define name="GAIN_P" value="170"/>
-    <define name="GAIN_Q" value="170"/>
+    <define name="GAIN_P" value="320"/>
+    <define name="GAIN_Q" value="320"/>
     <define name="GAIN_R" value="500"/>
 
     <define name="IGAIN_P" value="75"/>
