@@ -55,6 +55,7 @@
     </program>
   </section>
 
+  <section name="sessions">
     <session name="helidd">
       <program name="BluegigaUsbDongle">
         <arg flag="/dev/ttyACM0" constant="00:07:80:2d:d6:d9"/>
@@ -76,7 +77,6 @@
         <arg flag="hobbyking.xml"/>
       </program>
     </session>
-  <section name="sessions">
     <session name="Bluegiga">
       <program name="Data Link">
         <arg flag="-udp"/>
