@@ -109,6 +109,7 @@
  * Spektrum
  */
 /* The line that is pulled low at power up to initiate the bind process */
+/*
 #define SPEKTRUM_BIND_PIN GPIO0
 #define SPEKTRUM_BIND_PIN_PORT GPIOB
 
@@ -135,32 +136,36 @@
 #define SPEKTRUM_UART5_IRQ NVIC_UART5_IRQ
 #define SPEKTRUM_UART5_ISR uart5_isr
 #define SPEKTRUM_UART5_DEV UART5
-
+*/
 /* PPM
  *
  * Default is PPM config 2, input on GPIOA1 (Servo pin 6)
  */
-
+/*
 #ifndef PPM_CONFIG
 #define PPM_CONFIG 2
 #endif
 
-#if PPM_CONFIG == 1
+#if PPM_CONFIG == 1*/
 /* input on PA10 (UART1_RX) */
+/*
 #define USE_PPM_TIM1 1
 #define PPM_CHANNEL         TIM_IC3
 #define PPM_TIMER_INPUT     TIM_IC_IN_TI3
 #define PPM_IRQ             NVIC_TIM1_CC_IRQ
 #define PPM_IRQ2            NVIC_TIM1_UP_TIM10_IRQ
+*/
 // Capture/Compare InteruptEnable and InterruptFlag
+/*
 #define PPM_CC_IE           TIM_DIER_CC3IE
 #define PPM_CC_IF           TIM_SR_CC3IF
 #define PPM_GPIO_PORT       GPIOA
 #define PPM_GPIO_PIN        GPIO10
 #define PPM_GPIO_AF         GPIO_AF1
-
 #elif PPM_CONFIG == 2
+*/
 /* input on PA01 (Servo 6 pin) */
+/*
 #define USE_PPM_TIM2 1
 #define PPM_CHANNEL         TIM_IC2
 #define PPM_TIMER_INPUT     TIM_IC_IN_TI2
@@ -171,8 +176,9 @@
 #define PPM_GPIO_PORT       GPIOA
 #define PPM_GPIO_PIN        GPIO1
 #define PPM_GPIO_AF         GPIO_AF1
-
+*/
 // Move default ADC timer
+/*
 #if USE_AD_TIM2
 #undef USE_AD_TIM2
 #endif
@@ -182,7 +188,9 @@
 #if USE_SERVOS_7AND8
 #error "You cannot USE_SERVOS_7AND8 and PPM input on PB07 (SERVO8) at the same time"
 #endif
+*/
 /* input on PB07 (Servo 8 pin) */
+/*
 #define USE_PPM_TIM4 1
 #define PPM_CHANNEL         TIM_IC2
 #define PPM_TIMER_INPUT     TIM_IC_IN_TI2
@@ -198,8 +206,8 @@
 #error "Unknown PPM config"
 
 #endif // PPM_CONFIG
-
-/* SPI */
+*/
+/* Barto SPI */
 #define SPI1_GPIO_AF GPIO_AF5
 #define SPI1_GPIO_PORT_MISO GPIOA
 #define SPI1_GPIO_MISO GPIO6
@@ -207,7 +215,7 @@
 #define SPI1_GPIO_MOSI GPIO7
 #define SPI1_GPIO_PORT_SCK GPIOA
 #define SPI1_GPIO_SCK GPIO5
-
+/* IMU SPI */
 #define SPI2_GPIO_AF GPIO_AF5
 #define SPI2_GPIO_PORT_MISO GPIOB
 #define SPI2_GPIO_MISO GPIO14
@@ -215,7 +223,7 @@
 #define SPI2_GPIO_MOSI GPIO15
 #define SPI2_GPIO_PORT_SCK GPIOB
 #define SPI2_GPIO_SCK GPIO13
-
+/* ???????? */
 #define SPI_SELECT_SLAVE0_PORT GPIOA
 #define SPI_SELECT_SLAVE0_PIN GPIO15
 
@@ -252,19 +260,6 @@
  */
 
 /* Onboard ADCs */
-/*
-   ADC1 PC3/ADC13
-   ADC2 PC0/ADC10
-   ADC3 PC1/ADC11
-   ADC4 PC5/ADC15
-   ADC6 PC2/ADC12
-   BATT PC4/ADC14
-*/
-
-/* provide defines that can be used to access the ADC_x in the code or airframe file
- * these directly map to the index number of the 4 adc channels defined above
- * 4th (index 3) is used for bat monitoring by default
- */
 
 #ifndef USE_ADC_1
 #define USE_ADC_1 1
@@ -277,13 +272,20 @@
 #define ADC_1_GPIO_PIN GPIO4
 #endif
 
+/* allow to define ADC_CHANNEL_VSUPPLY in the airframe file*/
+#ifndef ADC_CHANNEL_VSUPPLY
+#define ADC_CHANNEL_VSUPPLY ADC_1
+#endif
+
+#define DefaultVoltageOfAdc(adc) (0.0045*adc)
+
 #if USE_ADC_2
 #define AD1_2_CHANNEL 15
 #define ADC_2 AD1_2
 #define ADC_2_GPIO_PORT GPIOC
 #define ADC_2_GPIO_PIN GPIO5
 #endif
-
+/*
 #if USE_ADC_3
 #define AD1_3_CHANNEL 0
 #define ADC_3 AD1_3
@@ -297,23 +299,19 @@
 #define ADC_4_GPIO_PORT GPIOA
 #define ADC_4_GPIO_PIN GPIO1
 #endif
+*/
 
-/* allow to define ADC_CHANNEL_VSUPPLY in the airframe file*/
-#ifndef ADC_CHANNEL_VSUPPLY
-#define ADC_CHANNEL_VSUPPLY ADC_1
-#endif
-
-#define DefaultVoltageOfAdc(adc) (0.0045*adc)
 
 
 /*
  * PWM
  *
  */
-#define PWM_USE_TIM1 1
-#define PWM_USE_TIM3 0
-#define PWM_USE_TIM5 0
-
+#define PWM_USE_TIM2 1
+/*
+#define PWM_USE_TIM4 1
+#define PWM_USE_TIM5 1
+*/
 #ifndef USE_PWM1
 #define USE_PWM1 1
 #endif
@@ -326,11 +324,12 @@
 #ifndef USE_PWM4
 #define USE_PWM4 1
 #endif
+/*
 #ifndef USE_PWM5
-#define USE_PWM5 0
+#define USE_PWM5 1
 #endif
 #ifndef USE_PWM6
-#define USE_PWM6 0
+#define USE_PWM6 1
 #endif
 
 #if USE_SERVOS_7AND8
@@ -346,13 +345,13 @@
 #else
 #define ACTUATORS_PWM_NB 6
 #endif
-
+*/
 // PWM_SERVO_x is the index of the servo in the actuators_pwm_values array
 #if USE_PWM1
 #define PWM_SERVO_1 0
-#define PWM_SERVO_1_TIMER TIM1
-#define PWM_SERVO_1_GPIO GPIOE
-#define PWM_SERVO_1_PIN GPIO9
+#define PWM_SERVO_1_TIMER TIM2
+#define PWM_SERVO_1_GPIO GPIOA
+#define PWM_SERVO_1_PIN GPIO0
 #define PWM_SERVO_1_AF GPIO_AF1
 #define PWM_SERVO_1_OC TIM_OC1
 #define PWM_SERVO_1_OC_BIT (1<<0)
@@ -362,9 +361,9 @@
 
 #if USE_PWM2
 #define PWM_SERVO_2 1
-#define PWM_SERVO_2_TIMER TIM1
-#define PWM_SERVO_2_GPIO GPIOE
-#define PWM_SERVO_2_PIN GPIO11
+#define PWM_SERVO_2_TIMER TIM2
+#define PWM_SERVO_2_GPIO GPIOA
+#define PWM_SERVO_2_PIN GPIO1
 #define PWM_SERVO_2_AF GPIO_AF1
 #define PWM_SERVO_2_OC TIM_OC2
 #define PWM_SERVO_2_OC_BIT (1<<1)
@@ -374,9 +373,9 @@
 
 #if USE_PWM3
 #define PWM_SERVO_3 2
-#define PWM_SERVO_3_TIMER TIM1
-#define PWM_SERVO_3_GPIO GPIOE
-#define PWM_SERVO_3_PIN GPIO13
+#define PWM_SERVO_3_TIMER TIM2
+#define PWM_SERVO_3_GPIO GPIOA
+#define PWM_SERVO_3_PIN GPIO2
 #define PWM_SERVO_3_AF GPIO_AF1
 #define PWM_SERVO_3_OC TIM_OC3
 #define PWM_SERVO_3_OC_BIT (1<<2)
@@ -386,16 +385,16 @@
 
 #if USE_PWM4
 #define PWM_SERVO_4 3
-#define PWM_SERVO_4_TIMER TIM1
-#define PWM_SERVO_4_GPIO GPIOE
-#define PWM_SERVO_4_PIN GPIO14
+#define PWM_SERVO_4_TIMER TIM2
+#define PWM_SERVO_4_GPIO GPIOA
+#define PWM_SERVO_4_PIN GPIO3	
 #define PWM_SERVO_4_AF GPIO_AF1
 #define PWM_SERVO_4_OC TIM_OC4
 #define PWM_SERVO_4_OC_BIT (1<<3)
 #else
 #define PWM_SERVO_4_OC_BIT 0
 #endif
-
+/*
 #if USE_PWM5
 #define PWM_SERVO_5 4
 #define PWM_SERVO_5_TIMER TIM5
@@ -443,10 +442,13 @@
 #else
 #define PWM_SERVO_8_OC_BIT 0
 #endif
-
-/* servos 1-4 on TIM1 */
-#define PWM_TIM1_CHAN_MASK (PWM_SERVO_1_OC_BIT|PWM_SERVO_2_OC_BIT|PWM_SERVO_3_OC_BIT|PWM_SERVO_4_OC_BIT)
-
+*/
+/* servos 1-4 on TIM2 */
+#define PWM_TIM2_CHAN_MASK (PWM_SERVO_1_OC_BIT|PWM_SERVO_2_OC_BIT|PWM_SERVO_3_OC_BIT|PWM_SERVO_4_OC_BIT)
+/*
+#define PWM_TIM4_CHAN_MASK (PWM_SERVO_7_OC_BIT|PWM_SERVO_8_OC_BIT)
+#define PWM_TIM5_CHAN_MASK (PWM_SERVO_5_OC_BIT|PWM_SERVO_6_OC_BIT)
+*/
 /* by default activate onboard baro */
 #ifndef USE_BARO_BOARD
 #define USE_BARO_BOARD 1

@@ -17,8 +17,8 @@ $(TARGET).LDSCRIPT=$(SRC_ARCH)/lisa-d.ld
 
 # -----------------------------------------------------------------------
 
-# default flash mode is via usb dfu bootloader (luftboot)
-# other possibilities: DFU-UTIL, SWD, JTAG_BMP, STLINK, SERIAL
+# default flash mode is via SWD
+# other possibilities: SERIAL(untested)
 FLASH_MODE ?= SWD
 
 HAS_LUFTBOOT ?= 0

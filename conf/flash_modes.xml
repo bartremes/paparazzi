@@ -85,6 +85,7 @@
       <board name="naze32*"/>
       <board name="cjmcu*"/>
       <board name="openpilot_revo.*"/>
+      <board name="lisa_d*"/>
     </boards>
   </mode>
   <mode name="BlackMagic Probe (JTAG)">
@@ -96,6 +97,7 @@
       <board name="li[s]?a_mx_.*"/>
       <board name="px4fmu_.*"/>
       <board name="elle*"/>
+      <board name="lisa_d*"/>
     </boards>
   </mode>
     <mode name="Px4 bootloader">
