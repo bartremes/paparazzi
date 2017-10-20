@@ -1,48 +1,48 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 
-<flight_plan alt="190" ground_alt="163" home_mode_height="50" lat0="43.54337" lon0="1.3580" max_dist_from_home="1500" name="Imav2017ToulouseOutdoor" qfu="270" security_height="25">
+<flight_plan alt="66" ground_alt="16" home_mode_height="50" lat0="51.402031" lon0="4.470727" max_dist_from_home="1500" name="KalmthoutFiqedWing" qfu="270" security_height="25">
   <header>
 #include "subsystems/datalink/datalink.h"
 </header>
   <waypoints>
-    <waypoint name="HOME" x="-30.1" y="-4.2"/>
-    <waypoint alt="190.0" lat="43.543083" lon="1.356840" name="STDBY"/>
-    <waypoint alt="190.0" lat="43.5441600" lon="1.3583363" name="AF"/>
-    <waypoint alt="163.0" lat="43.5435428" lon="1.3577522" name="TD"/>
-    <waypoint name="BASELEG" x="26.9" y="-23.0"/>
-    <waypoint lat="43.5428987" lon="1.3569293" name="CLIMB"/>
-    <waypoint name="MOB" x="-11.5" y="-21.2"/>
-    <waypoint lat="43.543170" lon="1.356667" name="1"/>
-    <waypoint lat="43.544517" lon="1.358297" name="2"/>
-    <waypoint lat="43.54186137484808" lon="1.35803816024604" name="_1"/>
-    <waypoint lat="43.54486611900425" lon="1.360391560903072" name="_2"/>
-    <waypoint lat="43.54583752229846" lon="1.358162396943372" name="_3"/>
-    <waypoint lat="43.54290001564623" lon="1.35567189347897" name="_4"/>
-    <waypoint lat="43.54280569159596" lon="1.355970753631562" name="FA1"/>
-    <waypoint lat="43.54203282443687" lon="1.357730376299314" name="FA2"/>
-    <waypoint lat="43.54476725472732" lon="1.359914642289456" name="FA3"/>
-    <waypoint lat="43.54548545277377" lon="1.358253496215646" name="FA4"/>
-    <waypoint lat="43.54451574564611" lon="1.35878555314799" name="MAP1"/>
-    <waypoint lat="43.54481761812786" lon="1.358082431183946" name="MAP2"/>
-    <waypoint lat="43.54279276303417" lon="1.356325307796358" name="MAP3"/>
-    <waypoint lat="43.54247904378586" lon="1.357110912977799" name="MAP4"/>
-    <waypoint lat="43.5428987" lon="1.3569293" name="S1"/>
-    <waypoint lat="43.5444201" lon="1.3588119" name="S2"/>
-    <waypoint lat="43.5435428" lon="1.3577522" name="FW_LAND"/>
-    <waypoint lat="43.54289009468191" lon="1.357408650983151" name="GROUND_STATION"/>
+    <waypoint name="HOME" x="24.0" y="36.0"/>
+    <waypoint alt="190.0" lat="51.402461" lon="4.471394" name="STDBY"/>
+    <waypoint alt="190.0" lat="51.402261" lon="4.471615" name="AF"/>
+    <waypoint alt="163.0" lat="51.402047" lon="4.470741" name="TD"/>
+    <waypoint name="BASELEG" x="92.9" y="48.4"/>
+    <waypoint lat="51.402529" lon="4.471626" name="CLIMB"/>
+    <waypoint name="MOB" x="-31.4" y="12.8"/>
+    <waypoint lat="51.402652" lon="4.470795" name="1"/>
+    <waypoint lat="51.403262" lon="4.472545" name="2"/>
+    <waypoint lat="51.403328" lon="4.468832" name="_1"/>
+    <waypoint lat="51.404172" lon="4.473853" name="_2"/>
+    <waypoint lat="51.402657" lon="4.474159" name="_3"/>
+    <waypoint lat="51.401304" lon="4.470646" name="_4"/>
+    <waypoint lat="51.403197" lon="4.469340" name="FA1"/>
+    <waypoint lat="51.403840" lon="4.473640" name="FA2"/>
+    <waypoint lat="51.402684" lon="4.473816" name="FA3"/>
+    <waypoint lat="51.401443" lon="4.470622" name="FA4"/>
+    <waypoint lat="51.402775" lon="4.471120" name="MAP1"/>
+    <waypoint lat="51.402976" lon="4.472061" name="MAP2"/>
+    <waypoint lat="51.402465" lon="4.472529" name="MAP3"/>
+    <waypoint lat="51.402172" lon="4.471520" name="MAP4"/>
+    <waypoint lat="51.402340" lon="4.470836" name="S1"/>
+    <waypoint lat="51.402751" lon="4.472568" name="S2"/>
+    <waypoint lat="51.402114" lon="4.471061" name="FW_LAND"/>
+    <waypoint lat="51.401857" lon="4.470814" name="GROUND_STATION"/>
   </waypoints>
   <sectors>
     <sector color="red" name="Square">
       <corner name="_1"/>
-      <corner name="_4"/>
-      <corner name="_3"/>
       <corner name="_2"/>
+      <corner name="_3"/>
+      <corner name="_4"/>
     </sector>
-    <sector color="green" name="GREEN">
+    <sector color="blue" name="GREEN">
       <corner name="FA1"/>
-      <corner name="FA4"/>
-      <corner name="FA3"/>
       <corner name="FA2"/>
+      <corner name="FA3"/>
+      <corner name="FA4"/>
     </sector>
     <sector color="yellow" name="MAP">
       <corner name="MAP1"/>
@@ -55,8 +55,8 @@
     <variable init="15." max="50." min="0." step="1.0" var="roll_step"/>
   </variables>
   <exceptions>
-    <exception cond="(Or(! InsideGREEN(GetPosX(), GetPosY()), GetPosAlt() > GetAltRef() + 150) && !(nav_block == IndexOfBlock('kill_and_fall')))" deroute="Center"/>
-    <exception cond="radio_control.status == RC_REALLY_LOST" deroute="kill_and_fall"/>
+    <exception cond="(Or(! InsideGREEN(GetPosX(), GetPosY()), GetPosAlt() > GetAltRef() + 150) && !(nav_block == IndexOfBlock('Holding point')))" deroute="Center"/>
+    <exception cond="radio_control.status == RC_REALLY_LOST" deroute="Holding point"/>
   </exceptions>
   <blocks>
     <block name="Center" pre_call="if (!InsideSquare(GetPosX(), GetPosY())) NavKillThrottle();">
@@ -72,7 +72,7 @@
     </block>
     <block name="Holding point">
       <set value="1" var="autopilot.kill_throttle"/>
-      <attitude roll="0" throttle="0" vmode="throttle" until="true"/>
+      <attitude roll="0" throttle="0" vmode="throttle"/>
     </block>
     <block name="Takeoff" strip_button="Takeoff (wp CLIMB)" strip_icon="takeoff.png">
       <exception cond="GetPosAlt() > GetAltRef()+25" deroute="Oval 1-2"/>
