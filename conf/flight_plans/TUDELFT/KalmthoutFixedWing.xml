@@ -6,9 +6,9 @@
 </header>
   <waypoints>
     <waypoint name="HOME" x="24.0" y="36.0"/>
-    <waypoint alt="190.0" lat="51.402461" lon="4.471394" name="STDBY"/>
-    <waypoint alt="190.0" lat="51.402261" lon="4.471615" name="AF"/>
-    <waypoint alt="163.0" lat="51.402047" lon="4.470741" name="TD"/>
+    <waypoint alt="90.0" lat="51.402461" lon="4.471394" name="STDBY"/>
+    <waypoint alt="90.0" lat="51.402261" lon="4.471615" name="AF"/>
+    <waypoint alt="66.0" lat="51.402047" lon="4.470741" name="TD"/>
     <waypoint name="BASELEG" x="92.9" y="48.4"/>
     <waypoint lat="51.402529" lon="4.471626" name="CLIMB"/>
     <waypoint name="MOB" x="-31.4" y="12.8"/>
