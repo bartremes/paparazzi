@@ -59,9 +59,6 @@
     <exception cond="radio_control.status == RC_REALLY_LOST" deroute="Standby"/>
   </exceptions>
   <blocks>
-    <block name="Center" pre_call="if (!InsideSquare(GetPosX(), GetPosY())) NavKillThrottle();">
-      <circle radius="DEFAULT_CIRCLE_RADIUS" wp="HOME"/>
-    </block>
     <block name="Wait GPS">
       <set value="1" var="autopilot.kill_throttle"/>
       <while cond="!GpsFixValid()"/>
@@ -75,7 +72,7 @@
       <attitude roll="0" throttle="0" vmode="throttle"/>
     </block>
     <block name="Takeoff" strip_button="Takeoff (wp CLIMB)" strip_icon="takeoff.png">
-      <exception cond="GetPosAlt() > GetAltRef()+25" deroute="Oval 1-2"/>
+      <exception cond="GetPosAlt() > GetAltRef()+25" deroute="Standby"/>
       <set value="0" var="autopilot.kill_throttle"/>
       <go wp="CLIMB"/>
     </block>
@@ -197,6 +194,9 @@
       <exception cond="datalink_time > 22" deroute="Standby"/>
       <go from="STDBY" hmode="route" wp="2"/>
       <go from="2" hmode="route" wp="STDBY"/>
+    </block>
+    <block name="Center" pre_call="if (!InsideSquare(GetPosX(), GetPosY())) NavKillThrottle();">
+      <circle radius="DEFAULT_CIRCLE_RADIUS" wp="HOME"/>
     </block>
     <block name="kill_and_fall">
       <set value="1" var="autopilot.kill_throttle"/>

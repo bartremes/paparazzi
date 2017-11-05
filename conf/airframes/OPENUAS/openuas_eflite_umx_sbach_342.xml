@@ -12,7 +12,7 @@
      + LOGGER:      OnboardSD highspeed logger
 
 NOTES:
-     + Servo pins point to back of airframe
+     + Servo pins point to back of airframe 1 motor, 2 left rol, 3 height, 4 rudder (not used by autopilot), 5 right rol
      + Custom adjusted BLHeli, see mod in airframe remarks
      + If programming the RX make sure there is no dual-rate switched on and the range of CH2&4 get to 100% of range
 -->
@@ -489,7 +489,7 @@ NOTES:
     
     <define name="CARROT" value="4." unit="s"/> <!-- TODO maye ~?s -->
     
-    <define name="DEFAULT_CIRCLE_RADIUS" value="30." unit="m"/> <!-- TODO determine -->
+    <define name="DEFAULT_CIRCLE_RADIUS" value="20." unit="m"/> <!-- TODO determine -->
     <define name="LANDING_CIRCLE_RADIUS" value="20."/> <!-- TODO determine -->
      <!-- MIN_CIRCLE_RADIUS used and needed for spiral navigation function and panic autolanding turns-->
     <define name="MIN_CIRCLE_RADIUS" value="10."/> <!-- TODO determine -->
