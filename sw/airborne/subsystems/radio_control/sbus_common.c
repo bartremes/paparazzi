@@ -137,9 +137,9 @@ void sbus_common_decode_event(struct Sbus *sbus_p, struct uart_periph *dev)
   uint8_t rbyte;
   if (uart_char_available(dev)) {
     // Took too long to receive a full SBUS frame (usually during boot to synchronize)
-    if(get_sys_time_msec() > (sbus_p->start_time+SBUS_TIMEOUT_MS)) {
-      sbus_p->status = SBUS_STATUS_UNINIT;
-    }
+ //   if(get_sys_time_msec() > (sbus_p->start_time+SBUS_TIMEOUT_MS)) {
+   //   sbus_p->status = SBUS_STATUS_UNINIT;
+ //   }
 
     do {
       rbyte = uart_getch(dev);
