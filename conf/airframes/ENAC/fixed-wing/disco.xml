@@ -17,7 +17,11 @@
       <module name="radio_control" type="ppm"/>
     </target>
 
-    <module name="telemetry" type="transparent_udp"/>
+ <!--   <module name="telemetry" type="transparent_udp"/> For Wifi session:flight UDP-->
+      <module name="telemetry" type="transparent"><!-- For long range usb dongle session:flight ttyUSB0 Transparrand @57600 use type="xbee_api" for Digi Xbee modems -->
+        <configure name="MODEM_PORT" value="UART2"/>
+        <configure name="MODEM_BAUD" value="B9600"/>
+      </module>
 
     <module name="imu" type="disco"/>
     <module name="ahrs" type="float_dcm"/>
