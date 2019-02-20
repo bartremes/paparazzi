@@ -17,12 +17,19 @@
       <module name="radio_control" type="ppm"/>
     </target>
 
- <!--   <module name="telemetry" type="transparent_udp"/> For Wifi session:flight UDP-->
- <!--   <module name="telemetry" type="xbee_api" /> for Digi Xbee modems session: flight XbeeAPI USB0 @56700-->
-      <module name="telemetry" type="transparent"><!-- For long range usb 868 dongle session: flight ttyUSB0 Transparrand @9600-->
-        <configure name="MODEM_PORT" value="UART2"/>
-        <configure name="MODEM_BAUD" value="B9600"/>
+ <!-- <module name="telemetry" type="transparent_udp"/> For Wifi session:flight UDP-->
+
+
+      <module name="telemetry" type="xbee_api" > 
+	<configure name="MODEM_BAUD" value="B57600"/>
+	<configure name="MODEM_PORT" value="UART2"/><!-- for Digi Xbee modems session: flight XbeeAPI USB0 @56700-->
       </module>
+
+ <!-- <module name="telemetry" type="transparent"> 
+	        <configure name="MODEM_BAUD" value="B9600"/>  
+		<configure name="MODEM_PORT" value="UART2"/> For long range usb 868 dongle session: flight ttyUSB0 Transparrand @9600
+        </module> -->
+       
 
     <module name="imu" type="disco"/>
     <module name="ahrs" type="float_dcm"/>
